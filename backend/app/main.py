@@ -4,14 +4,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.db.session import engine
 from app.db.base import Base
 from app.api.router import api_router
-from app.api.routes import applications
-from app.api.routes import predictions
 
 
 app = FastAPI(
     title="AI Application Screening API",
     version="1.0.0",
-    description="Backend API for AI-powered application screening"
+    description="Backend API for AI-powered application screening",
 )
 
 # CORS configuration – allow frontend origins to call the API
@@ -43,6 +41,3 @@ def root():
 def health_check():
     return {"status": "ok"}
 
-app.include_router(
-    predictions.router, 
-    tags=["Screening"])

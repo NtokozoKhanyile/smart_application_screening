@@ -6,7 +6,6 @@ from app.core.config import settings
 from app.core.security import oauth2_scheme
 from app.db.session import get_db
 from app.db.models.user import User
-from app.db.session import SessionLocal
 from app.db.models.application import Application
 
 
@@ -43,6 +42,7 @@ def get_current_user(
 
     return user
 
+
 def require_role(required_role: str):
     def role_checker(current_user: User = Depends(get_current_user)):
         if current_user.role != required_role:
@@ -54,16 +54,13 @@ def require_role(required_role: str):
 
     return role_checker
 
+
 def require_application_owner_or_admin(
     application_id: int,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    application = (
-        db.query(Application)
-        .filter(Application.id == application_id)
-        .first()
-    )
+    application = db.query(Application).filter(Application.id == application_id).first()
 
     if not application:
         raise HTTPException(
@@ -71,16 +68,14 @@ def require_application_owner_or_admin(
             detail="Application not found",
         )
 
-    if (
-        application.user_id != current_user.id
-        and current_user.role != "admin"
-    ):
+    if application.user_id != current_user.id and current_user.role != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized",
         )
 
     return application
+
 
 def require_admin(current_user: User = Depends(get_current_user)) -> User:
     if current_user.role != "admin":

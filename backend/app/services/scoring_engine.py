@@ -3,7 +3,6 @@ from datetime import datetime
 from app.db.models.course import Course
 from app.db.models.application import Application
 
-
 EVALUATION_VERSION = "rules_v1.0.1"
 
 
@@ -86,4 +85,3 @@ def evaluate_application(db: Session, application: Application):
             ),
             "evaluation_version": EVALUATION_VERSION,
         }
-

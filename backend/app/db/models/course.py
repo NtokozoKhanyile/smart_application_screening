@@ -11,15 +11,10 @@ class Course(Base):
     approval_threshold = Column(Float, nullable=False)
 
     subject_requirements = relationship(
-        "CourseSubjectRequirement",
-        back_populates="course",
-        cascade="all, delete"
+        "CourseSubjectRequirement", back_populates="course", cascade="all, delete"
     )
 
-    applications = relationship(
-        "Application", back_populates="course"
-    )
-
+    applications = relationship("Application", back_populates="course")
 
 
 class CourseSubjectRequirement(Base):
@@ -31,16 +26,10 @@ class CourseSubjectRequirement(Base):
     minimum_mark = Column(Float, default=0)
     weight = Column(Float, nullable=False)
 
-    #prevent duplicate subject per course
+    # prevent duplicate subject per course
     __table_args__ = (
-        UniqueConstraint('course_id', 'subject_id', name='uix_course_subject'),
+        UniqueConstraint("course_id", "subject_id", name="uix_course_subject"),
     )
 
-    course = relationship(
-        "Course", back_populates="subject_requirements"
-    )
-    subject = relationship(
-        "Subject"
-    )
-    
-
+    course = relationship("Course", back_populates="subject_requirements")
+    subject = relationship("Subject")

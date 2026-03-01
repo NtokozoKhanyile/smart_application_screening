@@ -5,13 +5,15 @@ from datetime import datetime
 
 from app.db.base import Base
 
+
 class ApplicationStatus(str, enum.Enum):
     draft = "draft"
     pending = "pending"
     screened = "screened"
     accepted = "accepted"
     rejected = "rejected"
-    
+
+
 class Application(Base):
     __tablename__ = "applications"
 
@@ -36,27 +38,21 @@ class Application(Base):
     guardian_email = Column(String, nullable=True)
 
     # Status and timestamps
-    status = Column(Enum(ApplicationStatus), default=ApplicationStatus.draft, nullable=False)
+    status = Column(
+        Enum(ApplicationStatus), default=ApplicationStatus.draft, nullable=False
+    )
     created_at = Column(DateTime, default=datetime.utcnow)
 
     documents = relationship(
-        "Document",
-        back_populates="application",
-        cascade="all, delete-orphan"
-    )
-    
-    screening_results = relationship(
-        "ScreeningResult", 
-        back_populates="application", 
-        cascade="all, delete-orphan"
+        "Document", back_populates="application", cascade="all, delete-orphan"
     )
 
-    course = relationship(
-        "Course", back_populates="applications"
-        )
-    
+    screening_results = relationship(
+        "ScreeningResult", back_populates="application", cascade="all, delete-orphan"
+    )
+
+    course = relationship("Course", back_populates="applications")
+
     subjects = relationship(
-        "ApplicationSubject", 
-        back_populates="application", 
-        cascade="all, delete-orphan"
+        "ApplicationSubject", back_populates="application", cascade="all, delete-orphan"
     )

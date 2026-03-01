@@ -7,7 +7,7 @@ def create_application(db: Session, data: ApplicationCreate):
     application = Application(
         candidate_name=data.candidate_name,
         email=data.email,
-        resume_text=data.resume_text
+        resume_text=data.resume_text,
     )
     db.add(application)
     db.commit()

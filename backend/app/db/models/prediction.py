@@ -3,7 +3,6 @@ from sqlalchemy.orm import relationship
 from app.db.base import Base
 
 
-
 class ScreeningResult(Base):
     __tablename__ = "screening_results"
 
@@ -16,13 +15,11 @@ class ScreeningResult(Base):
     model_version = Column(String, nullable=False)  # e.g. "v1.0"
     reviewed_by_admin = Column(Boolean, default=False)
 
-     # Admin Override Fields
+    # Admin Override Fields
     final_decision = Column(String, nullable=True)  # accept / reject
     admin_notes = Column(String, nullable=True)
     reviewed_by_admin_id = Column(Integer, ForeignKey("users.id"), nullable=True)
 
     application = relationship(
-    "Application",
-    back_populates="screening_results",
-    uselist=False
-)
+        "Application", back_populates="screening_results", uselist=False
+    )

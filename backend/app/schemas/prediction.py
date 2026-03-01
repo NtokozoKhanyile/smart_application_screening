@@ -3,6 +3,7 @@ from typing import Optional, Literal
 
 DecisionType = Literal["screened", "rejected", "review"]
 
+
 class ScreeningResultCreate(BaseModel):
     application_id: int
     prediction_score: float
@@ -27,9 +28,11 @@ class ScreeningResultOut(BaseModel):
     class Config:
         from_attributes = True
 
+
 class AdminReviewRequest(BaseModel):
     final_decision: Literal["accept", "reject"]  # "accept" or "reject"
     admin_notes: Optional[str] = None
+
 
 class ScreeningResultResponse(BaseModel):
     id: int
