@@ -14,17 +14,23 @@ def get_admin_dashboard_stats(db: Session = Depends(get_db)):
     total_screened = db.query(func.count(ScreeningResult.id)).scalar()
 
     # decisions currently returned by scoring engine are "screened" or "rejected"
-    ai_approvals = db.query(func.count(ScreeningResult.id)).filter(
-        ScreeningResult.decision == "screened"
-    ).scalar()
+    ai_approvals = (
+        db.query(func.count(ScreeningResult.id))
+        .filter(ScreeningResult.decision == "screened")
+        .scalar()
+    )
 
-    ai_rejections = db.query(func.count(ScreeningResult.id)).filter(
-        ScreeningResult.decision == "rejected"
-    ).scalar()
+    ai_rejections = (
+        db.query(func.count(ScreeningResult.id))
+        .filter(ScreeningResult.decision == "rejected")
+        .scalar()
+    )
 
-    admin_overrides = db.query(func.count(ScreeningResult.id)).filter(
-        ScreeningResult.reviewed_by_admin == True
-    ).scalar()
+    admin_overrides = (
+        db.query(func.count(ScreeningResult.id))
+        .filter(ScreeningResult.reviewed_by_admin == True)
+        .scalar()
+    )
 
     avg_score = db.query(func.avg(ScreeningResult.prediction_score)).scalar()
 

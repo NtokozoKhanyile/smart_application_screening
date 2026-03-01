@@ -7,6 +7,7 @@ class SubjectMark(BaseModel):
     subject_id: int
     mark: int
 
+
 class ApplicationCreate(BaseModel):
     first_name: str
     middle_name: str | None = None
@@ -20,6 +21,7 @@ class ApplicationCreate(BaseModel):
     guardian_name: str
     guardian_phone_number: str
     guardian_email: str | None = None
+
 
 class ApplicationResponse(BaseModel):
     id: int
@@ -36,6 +38,7 @@ class ApplicationResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
 
 class ApplicationStatusUpdate(BaseModel):
     status: ApplicationStatus

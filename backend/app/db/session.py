@@ -7,6 +7,7 @@ SQLALCHEMY_DATABASE_URL = settings.database_url  # <- matches Settings.database_
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+
 def get_db():
     db: Session = SessionLocal()
     try:

@@ -1,33 +1,38 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-import random
- 
+
+
 from app.db.session import get_db
 from app.db.models.prediction import ScreeningResult
-from app.schemas.prediction import ScreeningResultCreate, ScreeningResultOut, AdminReviewRequest
+from app.schemas.prediction import (
+    ScreeningResultCreate,
+    ScreeningResultOut,
+    AdminReviewRequest,
+)
 from app.db.models.user import User
 from app.api.deps import require_admin, get_current_user
 from app.db.models.application import Application
 from app.services.scoring_engine import evaluate_application
 
-
 router = APIRouter(prefix="/predictions", tags=["Screening"])
 
 
-@router.post(
-    "/", response_model=ScreeningResultOut
-)
+@router.post("/", response_model=ScreeningResultOut)
 def create_screening_result(
     result: ScreeningResultCreate,
     db: Session = Depends(get_db),
     admin_user=Depends(require_admin),
 ):
-    existing = db.query(ScreeningResult).filter(
-        ScreeningResult.application_id == result.application_id
-    ).first()
+    existing = (
+        db.query(ScreeningResult)
+        .filter(ScreeningResult.application_id == result.application_id)
+        .first()
+    )
 
     if existing:
-        raise HTTPException(status_code=400, detail="Screening already exists for this application")
+        raise HTTPException(
+            status_code=400, detail="Screening already exists for this application"
+        )
 
     screening = ScreeningResult(**result.dict())
     db.add(screening)
@@ -36,14 +41,14 @@ def create_screening_result(
 
     return screening
 
+
 @router.post(
-    "/applications/{application_id}/screen",
-    dependencies=[Depends(require_admin)]
+    "/applications/{application_id}/screen", dependencies=[Depends(require_admin)]
 )
 def screen_application(
     application_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user),
+    current_user=Depends(get_current_user),
 ):
     # only admins should call this endpoint; require_admin is in dependencies
 
@@ -72,9 +77,9 @@ def screen_application(
         "explanation": evaluation.get("explanation"),
     }
 
+
 @router.patch(
-        "/screening-results/{result_id}/review",
-        dependencies=[Depends(require_admin)]
+    "/screening-results/{result_id}/review", dependencies=[Depends(require_admin)]
 )
 def admin_override_screening(
     result_id: int,
@@ -101,12 +106,15 @@ def admin_override_screening(
         "screening_result": result,
     }
 
+
 @router.get(
     "/applications/{application_id}",
     response_model=ScreeningResultOut,
-    dependencies=[Depends(require_admin)]
+    dependencies=[Depends(require_admin)],
 )
-def get_screening_result_for_application(application_id: int, db: Session = Depends(get_db)):
+def get_screening_result_for_application(
+    application_id: int, db: Session = Depends(get_db)
+):
     result = (
         db.query(ScreeningResult)
         .filter(ScreeningResult.application_id == application_id)
@@ -118,9 +126,8 @@ def get_screening_result_for_application(application_id: int, db: Session = Depe
 
     return result
 
-@router.get(
-        "/screening-results", dependencies=[Depends(require_admin)]
-)
+
+@router.get("/screening-results", dependencies=[Depends(require_admin)])
 def get_all_screening_results(db: Session = Depends(get_db)):
     results = db.query(ScreeningResult).all()
     return results
