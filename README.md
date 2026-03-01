@@ -228,7 +228,7 @@ For detailed endpoint documentation, see [backend/README.md#api-endpoints](backe
 
 ## 📝 License
 
-[Add your license here]
+"There is no licence yet"
 
 ---
 
