@@ -2,12 +2,7 @@ import api from './api'
 
 export const authService = {
   register: (email, password) => {
-    const formData = new URLSearchParams()
-    formData.append('email', email)
-    formData.append('password', password)
-    return api.post('/auth/register', formData, {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    })
+    return api.post(`/auth/register?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`)
   },
 
   login: (email, password) => {
