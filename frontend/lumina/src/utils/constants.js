@@ -56,6 +56,7 @@ export const ROUTES = {
   // Applicant
   STUDENT_DASHBOARD: '/dashboard',
   APPLICATION_FORM: '/applications/new',
+  APPLICATION_EDIT: '/applications/:id/edit',
   APPLICATION_DETAIL: '/applications/:id',
 
   // Admin

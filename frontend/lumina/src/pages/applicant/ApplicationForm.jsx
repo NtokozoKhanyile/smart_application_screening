@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import DashboardLayout from '../../components/layout/DashboardLayout'
 import StepPersonalInfo from '../../components/forms/StepPersonalInfo'
@@ -42,25 +42,65 @@ const ProgressBar = ({ currentStep, totalSteps }) => (
 
 const ApplicationForm = () => {
   const navigate = useNavigate()
-  const { createApplication, submitApplication } = useApplicationStore()
+  const { id: editId } = useParams() // present when route is /applications/:id/edit
+  const { createApplication, updateApplication, submitApplication, fetchApplicationById } = useApplicationStore()
   const { currentStep, totalSteps, formData, updateFormData, nextStep, prevStep, goToStep, lastSaved, clearDraft } = useApplicationForm()
-  const [applicationId, setApplicationId] = useState(null)
+  const [applicationId, setApplicationId] = useState(editId ? parseInt(editId) : null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // When editing an existing draft, load its data into the form
+  useEffect(() => {
+    if (editId) {
+      const loadDraft = async () => {
+        try {
+          const app = await fetchApplicationById(editId)
+          if (app) {
+            updateFormData({
+              first_name: app.first_name,
+              middle_name: app.middle_name,
+              surname: app.surname,
+              email: app.email,
+              phone_number: app.phone_number,
+              id_number: app.id_number,
+              address: app.address,
+              guardian_name: app.guardian_name,
+              guardian_phone_number: app.guardian_phone_number,
+              guardian_email: app.guardian_email,
+              course_id: app.course_id,
+              subjects: app.subjects?.map((s) => ({
+                subject_id: s.subject_id,
+                mark: s.mark,
+              })) || [],
+            })
+          }
+        } catch {
+          toast.error('Failed to load draft. Please try again.')
+          navigate(ROUTES.STUDENT_DASHBOARD)
+        }
+      }
+      loadDraft()
+    }
+  }, [editId])
 
   const handleStep1 = (data) => { updateFormData(data); nextStep() }
   const handleStep2 = (data) => { updateFormData(data); nextStep() }
 
   const handleStep3 = async (data) => {
     updateFormData(data)
-    if (!applicationId) {
-      try {
+    try {
+      if (applicationId) {
+        // Editing an existing draft — update it
+        await updateApplication(applicationId, { ...formData, ...data })
+        toast.success('Draft updated!')
+      } else {
+        // New application — create it
         const app = await createApplication({ ...formData, ...data })
         setApplicationId(app.id)
         toast.success('Application draft saved!')
-      } catch (err) {
-        toast.error(err.message || 'Failed to save application')
-        return
       }
+    } catch (err) {
+      toast.error(err.message || 'Failed to save application')
+      return
     }
     nextStep()
   }
@@ -85,7 +125,9 @@ const ApplicationForm = () => {
       <div className="max-w-2xl mx-auto">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">New Application</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {editId ? 'Continue Application' : 'New Application'}
+            </h1>
             <p className="text-gray-500 text-sm mt-1">Complete all steps to submit your application</p>
           </div>
           {lastSaved && (

@@ -79,6 +79,11 @@ const App = () => {
               <ApplicationForm />
             </ProtectedRoute>
           } />
+          <Route path={ROUTES.APPLICATION_EDIT} element={
+            <ProtectedRoute requiredRole={ROLES.APPLICANT}>
+              <ApplicationForm />
+            </ProtectedRoute>
+          } />
           <Route path={ROUTES.APPLICATION_DETAIL} element={
             <ProtectedRoute requiredRole={ROLES.APPLICANT}>
               <ApplicationDetail />
