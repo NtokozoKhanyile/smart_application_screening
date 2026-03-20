@@ -36,9 +36,16 @@ const StepAcademic = ({ formData, onNext, onBack }) => {
       s => s.subject_id && s.mark !== '' && Number(s.mark) >= 0 && Number(s.mark) <= 100
     )
     if (valid.length === 0) return setError('Please add at least one subject with a valid mark.')
+
+    // Build name lookup maps so StepReview can display names instead of IDs
+    const courseMap = Object.fromEntries(courses.map(c => [c.id, c.name]))
+    const subjectMap = Object.fromEntries(subjects.map(s => [s.id, s.name]))
+
     onNext({
       course_id: Number(selectedCourse),
       subjects: valid.map(s => ({ subject_id: Number(s.subject_id), mark: Number(s.mark) })),
+      courseMap,
+      subjectMap,
     })
   }
 

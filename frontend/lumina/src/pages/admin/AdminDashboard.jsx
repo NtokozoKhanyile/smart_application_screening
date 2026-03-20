@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import AdminLayout from '../../components/layout/AdminLayout'
 import StatusBadge from '../../components/common/StatusBadge'
-import LoadingSpinner from '../../components/common/LoadingSpinner'
+import LoadingSpinner, { DashboardSkeleton, TableRowSkeleton } from '../../components/common/LoadingSpinner'
 import api from '../../services/api'
 import { applicationAPI } from '../../services/applicationService'
 import { formatDate } from '../../utils/formatters'
@@ -116,8 +116,16 @@ const AdminDashboard = () => {
 
       {/* Stats Grid */}
       {loadingStats ? (
-        <div className="flex items-center justify-center py-12">
-          <LoadingSpinner size="md" message="Loading stats..." />
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="card p-5 flex items-center gap-4 animate-pulse">
+              <div className="w-12 h-12 rounded-xl bg-gray-200 flex-shrink-0" />
+              <div className="flex-1 space-y-2">
+                <div className="h-6 w-16 bg-gray-200 rounded-lg" />
+                <div className="h-3 w-24 bg-gray-200 rounded-lg" />
+              </div>
+            </div>
+          ))}
         </div>
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
@@ -196,9 +204,19 @@ const AdminDashboard = () => {
           </div>
 
           {loadingApps ? (
-            <div className="flex items-center justify-center py-12">
-              <LoadingSpinner size="sm" message="Loading applications..." />
-            </div>
+            <table className="w-full">
+              <tbody className="divide-y divide-gray-100">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i} className="animate-pulse">
+                    {[28, 20, 16, 16, 12].map((w, j) => (
+                      <td key={j} className="px-4 py-3">
+                        <div className={`h-3.5 bg-gray-200 rounded-lg w-${w}`} />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           ) : recentApplications.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-400 text-sm">No applications yet</p>

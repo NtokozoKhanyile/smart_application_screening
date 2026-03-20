@@ -4,6 +4,7 @@ import { FullPageLoader } from './components/common/LoadingSpinner'
 import ErrorBoundary from './components/common/ErrorBoundary'
 import useAuth from './hooks/useAuth'
 import { ROUTES, ROLES } from './utils/constants'
+import useSessionExpiry from './hooks/useSessionExpiry'
 
 // Auth Pages
 import Login from './pages/auth/Login'
@@ -50,6 +51,7 @@ const PublicRoute = ({ children }) => {
 
 // ── App ───────────────────────────────────────────────────────────
 const App = () => {
+  useSessionExpiry()
   return (
     <ErrorBoundary>
       <Suspense fallback={<FullPageLoader />}>

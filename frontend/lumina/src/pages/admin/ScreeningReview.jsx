@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { toast } from 'react-toastify'
 import AdminLayout from '../../components/layout/AdminLayout'
 import StatusBadge from '../../components/common/StatusBadge'
-import LoadingSpinner from '../../components/common/LoadingSpinner'
+import LoadingSpinner, { QueueItemSkeleton, SectionCardSkeleton } from '../../components/common/LoadingSpinner'
 import Modal from '../../components/common/Modal'
 import InfoRow from '../../components/common/InfoRow'
 import SectionCard from '../../components/common/SectionCard'
@@ -197,8 +197,26 @@ const ScreeningReview = () => {
   if (isLoading) {
     return (
       <AdminLayout>
-        <div className="flex items-center justify-center py-24">
-          <LoadingSpinner size="lg" message="Loading screening queue..." />
+        <div className="flex items-center justify-between mb-4">
+          <div className="animate-pulse space-y-2">
+            <div className="h-6 w-48 bg-gray-200 rounded-lg" />
+            <div className="h-3 w-32 bg-gray-200 rounded-lg" />
+          </div>
+        </div>
+        <div className="flex gap-4 h-[calc(100vh-200px)]">
+          <div className="w-72 flex-shrink-0 card overflow-hidden flex flex-col">
+            <div className="p-3 border-b border-gray-100">
+              <div className="h-7 bg-gray-200 rounded-lg animate-pulse" />
+            </div>
+            <div className="flex-1">
+              {Array.from({ length: 6 }).map((_, i) => <QueueItemSkeleton key={i} />)}
+            </div>
+          </div>
+          <div className="flex-1 space-y-4">
+            <SectionCardSkeleton rows={4} />
+            <SectionCardSkeleton rows={3} />
+            <SectionCardSkeleton rows={5} />
+          </div>
         </div>
       </AdminLayout>
     )
