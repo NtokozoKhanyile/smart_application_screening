@@ -10,7 +10,6 @@ import SectionCard from '../../components/common/SectionCard'
 import ScreeningResultCard from '../../components/common/ScreeningResultCard'
 import useApplicationStore from '../../store/applicationStore'
 import { applicationAPI } from '../../services/applicationService'
-import { predictionAPI } from '../../services/predictionService'
 import { formatDate, formatName } from '../../utils/formatters'
 import { APPLICATION_STATUS, ROUTES } from '../../utils/constants'
 
@@ -18,27 +17,12 @@ const ApplicationDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { currentApplication, isLoading, fetchApplicationById } = useApplicationStore()
-  const [screeningResult, setScreeningResult] = useState(null)
-  const [loadingResult, setLoadingResult] = useState(false)
   const [showSubmitModal, setShowSubmitModal] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     fetchApplicationById(id)
-    loadScreeningResult()
   }, [id])
-
-  const loadScreeningResult = async () => {
-    setLoadingResult(true)
-    try {
-      const { data } = await predictionAPI.getResult(id)
-      setScreeningResult(data)
-    } catch {
-      // No result yet
-    } finally {
-      setLoadingResult(false)
-    }
-  }
 
   const handleResubmit = async () => {
     setIsSubmitting(true)
@@ -46,7 +30,6 @@ const ApplicationDetail = () => {
       await applicationAPI.submit(id)
       toast.success('Application resubmitted!')
       fetchApplicationById(id)
-      loadScreeningResult()
     } catch {
       toast.error('Failed to resubmit application')
     } finally {
@@ -100,7 +83,10 @@ const ApplicationDetail = () => {
         <div className="flex items-center gap-3">
           <StatusBadge status={app.status} />
           {isDraft && (
-            <button onClick={() => navigate(ROUTES.APPLICATION_FORM)} className="btn-secondary">
+            <button
+              onClick={() => navigate(`/applications/${app.id}/edit`)}
+              className="btn-secondary"
+            >
               Continue Editing
             </button>
           )}
@@ -112,11 +98,8 @@ const ApplicationDetail = () => {
         </div>
       </div>
 
-      {/* Screening Result */}
-      {loadingResult
-        ? <div className="card p-6 mb-4 flex items-center justify-center"><LoadingSpinner size="sm" message="Loading result..." /></div>
-        : <ScreeningResultCard result={screeningResult} />
-      }
+      {/* Screening Result — sourced from nested application data, no extra API call */}
+      <ScreeningResultCard result={app.screening_result} />
 
       {/* Personal Info */}
       <SectionCard title="Personal Information">
