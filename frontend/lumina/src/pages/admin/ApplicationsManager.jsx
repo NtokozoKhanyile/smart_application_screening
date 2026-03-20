@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AdminLayout from '../../components/layout/AdminLayout'
 import StatusBadge from '../../components/common/StatusBadge'
-import LoadingSpinner from '../../components/common/LoadingSpinner'
+import LoadingSpinner, { TableSkeleton } from '../../components/common/LoadingSpinner'
 import { applicationAPI } from '../../services/applicationService'
 import { formatDate } from '../../utils/formatters'
 import { APPLICATION_STATUS, ROUTES } from '../../utils/constants'
@@ -289,9 +289,9 @@ const ApplicationsManager = () => {
 
         {/* Table */}
         {isLoading ? (
-          <div className="flex items-center justify-center py-16">
-            <LoadingSpinner size="md" message="Loading applications..." />
-          </div>
+          <table className="w-full">
+            <TableSkeleton rows={8} cols={7} />
+          </table>
         ) : paginated.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">

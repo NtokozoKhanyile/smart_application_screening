@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import DashboardLayout from '../../components/layout/DashboardLayout'
 import StatusBadge from '../../components/common/StatusBadge'
-import LoadingSpinner from '../../components/common/LoadingSpinner'
+import LoadingSpinner, { SectionCardSkeleton } from '../../components/common/LoadingSpinner'
 import Modal from '../../components/common/Modal'
 import InfoRow from '../../components/common/InfoRow'
 import SectionCard from '../../components/common/SectionCard'
@@ -41,9 +41,14 @@ const ApplicationDetail = () => {
   if (isLoading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center py-24">
-          <LoadingSpinner size="lg" message="Loading application..." />
+        <div className="animate-pulse flex items-center gap-3 mb-6">
+          <div className="w-5 h-5 bg-gray-200 rounded" />
+          <div className="h-6 w-48 bg-gray-200 rounded-lg" />
         </div>
+        <SectionCardSkeleton rows={2} />
+        <SectionCardSkeleton rows={5} />
+        <SectionCardSkeleton rows={3} />
+        <SectionCardSkeleton rows={4} />
       </DashboardLayout>
     )
   }
