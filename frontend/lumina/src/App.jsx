@@ -19,6 +19,7 @@ const AdminDashboard   = lazy(() => import('./pages/admin/AdminDashboard'))
 const ApplicationsManager = lazy(() => import('./pages/admin/ApplicationsManager'))
 const ScreeningReview  = lazy(() => import('./pages/admin/ScreeningReview'))
 const Analytics        = lazy(() => import('./pages/admin/Analytics'))
+const CourseManager    = lazy(() => import('./pages/admin/CourseManager'))
 
 // ── Protected Route ───────────────────────────────────────────────
 const ProtectedRoute = ({ children, requiredRole }) => {
@@ -111,6 +112,11 @@ const App = () => {
           <Route path={ROUTES.ADMIN_ANALYTICS} element={
             <ProtectedRoute requiredRole={ROLES.ADMIN}>
               <Analytics />
+            </ProtectedRoute>
+          } />
+          <Route path={ROUTES.ADMIN_COURSES} element={
+            <ProtectedRoute requiredRole={ROLES.ADMIN}>
+              <CourseManager />
             </ProtectedRoute>
           } />
 

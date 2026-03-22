@@ -1,11 +1,15 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import DashboardLayout from '../../components/layout/DashboardLayout'
 import StatusBadge from '../../components/common/StatusBadge'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
+import EmptyState from '../../components/common/EmptyState'
 import useApplicationStore from '../../store/applicationStore'
+import { applicationAPI } from '../../services/applicationService'
+import Modal from '../../components/common/Modal'
 import useAuth from '../../hooks/useAuth'
 import { formatDate } from '../../utils/formatters'
+import { toast } from 'react-toastify'
 import { ROUTES, APPLICATION_STATUS } from '../../utils/constants'
 
 // ── Stat Card ────────────────────────────────────────────────────
@@ -26,6 +30,23 @@ const StudentDashboard = () => {
   const { user } = useAuth()
   const { applications, isLoading, fetchApplications } = useApplicationStore()
   const navigate = useNavigate()
+  const [deleteTarget, setDeleteTarget] = useState(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    setIsDeleting(true)
+    try {
+      await applicationAPI.delete(deleteTarget.id)
+      await fetchApplications()
+      toast.success('Application deleted')
+    } catch {
+      toast.error('Failed to delete application')
+    } finally {
+      setIsDeleting(false)
+      setDeleteTarget(null)
+    }
+  }
 
   useEffect(() => {
     fetchApplications()
@@ -120,22 +141,13 @@ const StudentDashboard = () => {
             <LoadingSpinner size="md" message="Loading applications..." />
           </div>
         ) : applications.length === 0 ? (
-          <div className="text-center py-16 px-4">
-            <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-            <p className="text-gray-500 font-medium">No applications yet</p>
-            <p className="text-gray-400 text-sm mt-1">Start by creating your first application</p>
-            <button
-              onClick={() => navigate(ROUTES.APPLICATION_FORM)}
-              className="btn-primary mt-4"
-            >
-              Create Application
-            </button>
-          </div>
+          <EmptyState
+            variant="applications"
+            title="No applications yet"
+            description="Start your journey by creating your first application."
+            action={() => navigate(ROUTES.APPLICATION_FORM)}
+            actionLabel="Create Application"
+          />
         ) : (
           <>
             {/* Desktop Table */}
@@ -170,12 +182,22 @@ const StudentDashboard = () => {
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        <button
-                          onClick={() => navigate(`/applications/${app.id}`)}
-                          className="text-navy-700 hover:text-navy-900 text-sm font-medium hover:underline"
-                        >
-                          View →
-                        </button>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => navigate(`/applications/${app.id}`)}
+                            className="text-navy-700 hover:text-navy-900 text-sm font-medium hover:underline"
+                          >
+                            View →
+                          </button>
+                          {app.status === 'draft' && (
+                            <button
+                              onClick={() => setDeleteTarget(app)}
+                              className="text-red-400 hover:text-red-600 text-sm font-medium hover:underline"
+                            >
+                              Delete
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -205,12 +227,22 @@ const StudentDashboard = () => {
                         <span className="text-gray-400 text-xs">—</span>
                       )}
                     </div>
-                    <button
-                      onClick={() => navigate(`/applications/${app.id}`)}
-                      className="text-navy-700 text-sm font-medium hover:underline"
-                    >
-                      View →
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => navigate(`/applications/${app.id}`)}
+                        className="text-navy-700 text-sm font-medium hover:underline"
+                      >
+                        View →
+                      </button>
+                      {app.status === 'draft' && (
+                        <button
+                          onClick={() => setDeleteTarget(app)}
+                          className="text-red-400 text-sm font-medium hover:underline"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -218,6 +250,22 @@ const StudentDashboard = () => {
           </>
         )}
       </div>
+      <Modal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        title="Delete Application"
+      >
+        <p className="text-gray-600 text-sm mb-6">
+          Are you sure you want to delete your <span className="font-medium">{deleteTarget?.course?.name || 'draft'}</span> application? This cannot be undone.
+        </p>
+        <div className="flex gap-3 justify-end">
+          <button onClick={() => setDeleteTarget(null)} className="btn-secondary" disabled={isDeleting}>Cancel</button>
+          <button onClick={handleDelete} disabled={isDeleting} className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold flex items-center gap-2">
+            {isDeleting && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+            Delete
+          </button>
+        </div>
+      </Modal>
     </DashboardLayout>
   )
 }
