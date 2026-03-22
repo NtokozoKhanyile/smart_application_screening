@@ -4,6 +4,7 @@ import { toast } from 'react-toastify'
 import AdminLayout from '../../components/layout/AdminLayout'
 import StatusBadge from '../../components/common/StatusBadge'
 import LoadingSpinner, { DashboardSkeleton, TableRowSkeleton } from '../../components/common/LoadingSpinner'
+import EmptyState from '../../components/common/EmptyState'
 import api from '../../services/api'
 import { applicationAPI } from '../../services/applicationService'
 import { formatDate } from '../../utils/formatters'
@@ -218,9 +219,11 @@ const AdminDashboard = () => {
               </tbody>
             </table>
           ) : recentApplications.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-400 text-sm">No applications yet</p>
-            </div>
+            <EmptyState
+              variant="applications"
+              title="No applications yet"
+              description="Applications will appear here once students start submitting."
+            />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">

@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import AdminLayout from '../../components/layout/AdminLayout'
 import StatusBadge from '../../components/common/StatusBadge'
 import LoadingSpinner, { TableSkeleton } from '../../components/common/LoadingSpinner'
+import EmptyState from '../../components/common/EmptyState'
+import Modal from '../../components/common/Modal'
 import { applicationAPI } from '../../services/applicationService'
 import { formatDate } from '../../utils/formatters'
 import { APPLICATION_STATUS, ROUTES } from '../../utils/constants'
@@ -123,10 +125,27 @@ const ApplicationsManager = () => {
   const [sortField, setSortField] = useState('created_at')
   const [sortDir, setSortDir] = useState('desc')
   const [page, setPage] = useState(1)
+  const [deleteTarget, setDeleteTarget] = useState(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     fetchApplications()
   }, [])
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    setIsDeleting(true)
+    try {
+      await applicationAPI.delete(deleteTarget.id)
+      toast.success('Application deleted')
+      await fetchApplications()
+    } catch {
+      toast.error('Failed to delete application')
+    } finally {
+      setIsDeleting(false)
+      setDeleteTarget(null)
+    }
+  }
 
   // Reset to page 1 when filters change
   useEffect(() => {
@@ -293,16 +312,11 @@ const ApplicationsManager = () => {
             <TableSkeleton rows={8} cols={7} />
           </table>
         ) : paginated.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <svg className="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-            <p className="text-gray-500 font-medium">No applications found</p>
-            <p className="text-gray-400 text-sm mt-1">Try adjusting your filters</p>
-          </div>
+          <EmptyState
+            variant="search"
+            title="No applications found"
+            description="Try adjusting your search or filters to find what you're looking for."
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -370,12 +384,20 @@ const ApplicationsManager = () => {
                         {formatDate(app.created_at)}
                       </td>
                       <td className="px-4 py-3">
-                        <button
-                          onClick={() => navigate(ROUTES.ADMIN_SCREENING)}
-                          className="text-navy-700 hover:text-navy-900 text-sm font-medium hover:underline"
-                        >
-                          Review →
-                        </button>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => navigate(ROUTES.ADMIN_SCREENING)}
+                            className="text-navy-700 hover:text-navy-900 text-sm font-medium hover:underline"
+                          >
+                            Review →
+                          </button>
+                          <button
+                            onClick={() => setDeleteTarget(app)}
+                            className="text-red-400 hover:text-red-600 text-sm font-medium hover:underline"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   )
@@ -388,6 +410,22 @@ const ApplicationsManager = () => {
         {/* Pagination */}
         <Pagination page={page} totalPages={totalPages} onPage={setPage} />
       </div>
+      <Modal isOpen={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Delete Application">
+        <p className="text-gray-600 text-sm mb-2">
+          Are you sure you want to delete the application for{' '}
+          <span className="font-medium text-gray-900">
+            {deleteTarget?.first_name} {deleteTarget?.surname}
+          </span>?
+        </p>
+        <p className="text-xs text-red-500 mb-6">This action is permanent and cannot be undone.</p>
+        <div className="flex gap-3 justify-end">
+          <button onClick={() => setDeleteTarget(null)} className="btn-secondary" disabled={isDeleting}>Cancel</button>
+          <button onClick={handleDelete} disabled={isDeleting} className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold flex items-center gap-2">
+            {isDeleting && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+            Delete
+          </button>
+        </div>
+      </Modal>
     </AdminLayout>
   )
 }

@@ -64,4 +64,5 @@ export const ROUTES = {
   ADMIN_APPLICATIONS: '/admin/applications',
   ADMIN_SCREENING: '/admin/screening',
   ADMIN_ANALYTICS: '/admin/analytics',
+  ADMIN_COURSES: '/admin/courses',
 }

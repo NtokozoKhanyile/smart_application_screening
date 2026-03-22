@@ -3,6 +3,7 @@ import { toast } from 'react-toastify'
 import AdminLayout from '../../components/layout/AdminLayout'
 import StatusBadge from '../../components/common/StatusBadge'
 import LoadingSpinner, { QueueItemSkeleton, SectionCardSkeleton } from '../../components/common/LoadingSpinner'
+import EmptyState from '../../components/common/EmptyState'
 import Modal from '../../components/common/Modal'
 import InfoRow from '../../components/common/InfoRow'
 import SectionCard from '../../components/common/SectionCard'
@@ -90,6 +91,8 @@ const ScreeningReview = () => {
   const [pendingDecision, setPendingDecision] = useState(null) // decision awaiting confirmation
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
@@ -168,6 +171,21 @@ const ScreeningReview = () => {
     }
   }
 
+  const handleDelete = async () => {
+    if (!selectedApp) return
+    setIsDeleting(true)
+    try {
+      await applicationAPI.delete(selectedApp.id)
+      toast.success('Application deleted')
+      setShowDeleteConfirm(false)
+      await fetchData()
+    } catch {
+      toast.error('Failed to delete application')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e) => {
@@ -239,15 +257,12 @@ const ScreeningReview = () => {
       </div>
 
       {applications.length === 0 ? (
-        <div className="card text-center py-20">
-          <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-            <svg className="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-            </svg>
-          </div>
-          <p className="text-gray-500 font-medium">Queue is empty</p>
-          <p className="text-gray-400 text-sm mt-1">No applications to review right now</p>
+        <div className="card">
+          <EmptyState
+            variant="queue"
+            title="Queue is empty"
+            description="All applications have been reviewed. Check back later for new submissions."
+          />
         </div>
       ) : (
         <div className="flex gap-4 h-[calc(100vh-200px)]">
@@ -322,7 +337,18 @@ const ScreeningReview = () => {
                   <h3 className="text-sm font-semibold text-gray-700 mb-3">AI Screening Result</h3>
                   <div className="space-y-3">
                     <ScoreBar score={selectedResult.prediction_score} />
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 mb-3">
+                  <button
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="w-full flex items-center justify-center gap-2 py-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 text-sm font-medium transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Delete Application
+                  </button>
+                </div>
+                <div className="flex items-center gap-3">
                       <div className="flex-1">
                         <p className="text-xs text-gray-500 mb-1">AI Decision</p>
                         <StatusBadge status={selectedResult.decision} />
@@ -498,6 +524,27 @@ const ScreeningReview = () => {
           >
             {isSubmitting && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
             Confirm {decisionLabel[pendingDecision]}
+          </button>
+        </div>
+      </Modal>
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        title="Delete Application"
+      >
+        <p className="text-gray-600 text-sm mb-2">
+          Are you sure you want to delete the application for{' '}
+          <span className="font-medium text-gray-900">
+            {selectedApp?.first_name} {selectedApp?.surname}
+          </span>?
+        </p>
+        <p className="text-xs text-red-500 mb-6">This action is permanent and cannot be undone.</p>
+        <div className="flex gap-3 justify-end">
+          <button onClick={() => setShowDeleteConfirm(false)} className="btn-secondary" disabled={isDeleting}>Cancel</button>
+          <button onClick={handleDelete} disabled={isDeleting} className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold flex items-center gap-2">
+            {isDeleting && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+            Delete
           </button>
         </div>
       </Modal>

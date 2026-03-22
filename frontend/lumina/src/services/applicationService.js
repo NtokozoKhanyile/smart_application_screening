@@ -8,4 +8,5 @@ export const applicationAPI = {
   update: (id, data) => api.put(`/applications/${id}/edit`, data),
   submit: (id) => api.post(`/applications/${id}/submit`),
   updateStatus: (id, status) => api.patch(`/applications/${id}/status`, { status }),
+  delete: (id) => api.delete(`/applications/${id}`),
 }

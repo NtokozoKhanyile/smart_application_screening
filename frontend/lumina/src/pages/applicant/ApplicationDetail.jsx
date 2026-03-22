@@ -19,6 +19,8 @@ const ApplicationDetail = () => {
   const { currentApplication, isLoading, fetchApplicationById } = useApplicationStore()
   const [showSubmitModal, setShowSubmitModal] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     fetchApplicationById(id)
@@ -35,6 +37,20 @@ const ApplicationDetail = () => {
     } finally {
       setIsSubmitting(false)
       setShowSubmitModal(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    setIsDeleting(true)
+    try {
+      await applicationAPI.delete(id)
+      toast.success('Application deleted')
+      navigate(ROUTES.STUDENT_DASHBOARD)
+    } catch {
+      toast.error('Failed to delete application')
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteModal(false)
     }
   }
 
@@ -88,12 +104,20 @@ const ApplicationDetail = () => {
         <div className="flex items-center gap-3">
           <StatusBadge status={app.status} />
           {isDraft && (
-            <button
-              onClick={() => navigate(`/applications/${app.id}/edit`)}
-              className="btn-secondary"
-            >
-              Continue Editing
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => navigate(`/applications/${app.id}/edit`)}
+                className="btn-secondary"
+              >
+                Continue Editing
+              </button>
+              <button
+                onClick={() => setShowDeleteModal(true)}
+                className="px-4 py-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 text-sm font-medium transition-colors"
+              >
+                Delete
+              </button>
+            </div>
           )}
           {isRejected && (
             <button onClick={() => setShowSubmitModal(true)} className="btn-primary">
@@ -161,6 +185,20 @@ const ApplicationDetail = () => {
           </div>
         </SectionCard>
       )}
+
+      {/* Delete Modal */}
+      <Modal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)} title="Delete Application">
+        <p className="text-gray-600 text-sm mb-6">
+          Are you sure you want to delete this draft application? This cannot be undone.
+        </p>
+        <div className="flex gap-3 justify-end">
+          <button onClick={() => setShowDeleteModal(false)} className="btn-secondary" disabled={isDeleting}>Cancel</button>
+          <button onClick={handleDelete} disabled={isDeleting} className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold flex items-center gap-2">
+            {isDeleting && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+            Delete
+          </button>
+        </div>
+      </Modal>
 
       {/* Resubmit Modal */}
       <Modal isOpen={showSubmitModal} onClose={() => setShowSubmitModal(false)} title="Resubmit Application">
