@@ -10,21 +10,23 @@ export const ROLES = {
 
 export const APPLICATION_STATUS = {
   DRAFT: 'draft',
-  PENDING: 'pending',
-  SCREENED: 'screened',
+  SUBMITTED: 'submitted',
+  UNDER_REVIEW: 'under_review',
+  RECOMMENDED: 'recommended',
   ACCEPTED: 'accepted',
   REJECTED: 'rejected',
 }
 
 export const SCREENING_DECISION = {
-  SCREENED: 'screened',
+  RECOMMENDED: 'recommended',
   REJECTED: 'rejected',
   REVIEW: 'review',
 }
 
 export const FINAL_DECISION = {
-  ACCEPT: 'accept',
-  REJECT: 'reject',
+  ACCEPTED: 'accepted',
+  REJECTED: 'rejected',
+  UNDER_REVIEW: 'under_review',
 }
 
 export const DOCUMENT_TYPES = {
@@ -41,8 +43,9 @@ export const DOCUMENT_TYPE_LABELS = {
 
 export const STATUS_LABELS = {
   draft: 'Draft',
-  pending: 'Pending',
-  screened: 'Screened',
+  submitted: 'Submitted',
+  under_review: 'Under Review',
+  recommended: 'Recommended',
   accepted: 'Accepted',
   rejected: 'Rejected',
 }
