@@ -54,8 +54,8 @@ const StudentDashboard = () => {
 
   const stats = {
     total: applications.length,
-    pending: applications.filter((a) => a.status === APPLICATION_STATUS.PENDING).length,
-    screened: applications.filter((a) => a.status === APPLICATION_STATUS.SCREENED).length,
+    pending: applications.filter((a) => a.status === APPLICATION_STATUS.UNDER_REVIEW).length,
+    screened: applications.filter((a) => a.status === APPLICATION_STATUS.RECOMMENDED).length,
     accepted: applications.filter((a) => a.status === APPLICATION_STATUS.ACCEPTED).length,
   }
 

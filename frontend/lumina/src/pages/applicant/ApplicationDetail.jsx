@@ -85,6 +85,7 @@ const ApplicationDetail = () => {
   const app = currentApplication
   const isDraft = app.status === APPLICATION_STATUS.DRAFT
   const isRejected = app.status === APPLICATION_STATUS.REJECTED
+  const canResubmit = app.status === APPLICATION_STATUS.REJECTED
 
   return (
     <DashboardLayout>
@@ -119,7 +120,7 @@ const ApplicationDetail = () => {
               </button>
             </div>
           )}
-          {isRejected && (
+          {canResubmit && (
             <button onClick={() => setShowSubmitModal(true)} className="btn-primary">
               Resubmit
             </button>
@@ -128,7 +129,7 @@ const ApplicationDetail = () => {
       </div>
 
       {/* Screening Result — sourced from nested application data, no extra API call */}
-      <ScreeningResultCard result={app.screening_result} />
+      <ScreeningResultCard result={app.screening_result} applicationStatus={app.status} />
 
       {/* Personal Info */}
       <SectionCard title="Personal Information">

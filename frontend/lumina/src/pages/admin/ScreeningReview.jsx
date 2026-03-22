@@ -13,9 +13,9 @@ import { formatDate, formatName } from '../../utils/formatters'
 import { DOCUMENT_TYPE_LABELS } from '../../utils/constants'
 
 const DECISIONS = {
-  ACCEPT: 'accept',
-  REJECT: 'reject',
-  PENDING: 'pending',
+  ACCEPT: 'accepted',
+  REJECT: 'rejected',
+  PENDING: 'under_review',
 }
 
 // ── Score Bar ─────────────────────────────────────────────────────
@@ -158,7 +158,7 @@ const ScreeningReview = () => {
         final_decision: pendingDecision,
         admin_notes: notes,
       })
-      toast.success(`Application ${pendingDecision === DECISIONS.ACCEPT ? 'accepted' : pendingDecision === DECISIONS.REJECT ? 'rejected' : 'marked pending'}`)
+      toast.success(`Application ${pendingDecision === DECISIONS.ACCEPT ? 'accepted' : pendingDecision === DECISIONS.REJECT ? 'rejected' : 'sent for review'}`)
       setShowConfirm(false)
       setNotes('')
       setPendingDecision(null)
@@ -203,7 +203,7 @@ const ScreeningReview = () => {
   const decisionLabel = {
     [DECISIONS.ACCEPT]: 'Accept',
     [DECISIONS.REJECT]: 'Reject',
-    [DECISIONS.PENDING]: 'Mark as Pending',
+    [DECISIONS.PENDING]: 'Send for Review',
   }
 
   const decisionColor = {

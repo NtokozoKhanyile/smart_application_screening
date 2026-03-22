@@ -60,11 +60,11 @@ const FilterBar = ({ search, onSearch, statusFilter, onStatus, decisionFilter, o
       className="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-navy-300 text-gray-600"
     >
       <option value="">All Decisions</option>
-      <option value="screened">Screened</option>
+      <option value="recommended">Recommended</option>
       <option value="rejected">Rejected</option>
-      <option value="review">Review</option>
-      <option value="accept">Accepted</option>
-      <option value="reject">Rejected (Admin)</option>
+      <option value="review">Under Review</option>
+      <option value="accepted">Accepted (Admin)</option>
+      <option value="rejected_admin">Rejected (Admin)</option>
     </select>
   </div>
 )
