@@ -8,8 +8,9 @@ from app.db.base import Base
 
 class ApplicationStatus(str, enum.Enum):
     draft = "draft"
-    pending = "pending"
-    screened = "screened"
+    submitted = "submitted"
+    under_review = "under_review"
+    recommended = "recommended"
     accepted = "accepted"
     rejected = "rejected"
 
@@ -47,11 +48,13 @@ class Application(Base):
         "Document", back_populates="application", cascade="all, delete-orphan"
     )
 
-    screening_results = relationship(
-        "ScreeningResult", back_populates="application", cascade="all, delete-orphan"
+    screening_result = relationship(
+        "ScreeningResult", back_populates="application", cascade="all, delete-orphan", uselist=False
     )
 
-    course = relationship("Course", back_populates="applications")
+    course = relationship(
+        "Course", back_populates="applications"
+    )
 
     subjects = relationship(
         "ApplicationSubject", back_populates="application", cascade="all, delete-orphan"

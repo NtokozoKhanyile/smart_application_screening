@@ -24,13 +24,16 @@ class ScreeningResultOut(BaseModel):
     decision: str
     model_version: str
     reviewed_by_admin: bool
+    explanation: Optional[str] = None
+    final_decision: Optional[str] = None
+    admin_notes: Optional[str] = None
 
     class Config:
         from_attributes = True
 
 
 class AdminReviewRequest(BaseModel):
-    final_decision: Literal["accept", "reject"]  # "accept" or "reject"
+    final_decision: Literal["accept", "reject", "pending"]
     admin_notes: Optional[str] = None
 
 
@@ -40,6 +43,7 @@ class ScreeningResultResponse(BaseModel):
     prediction_score: float
     decision: str
     model_version: str
+    explanation: Optional[str] = None
 
     class Config:
         from_attributes = True

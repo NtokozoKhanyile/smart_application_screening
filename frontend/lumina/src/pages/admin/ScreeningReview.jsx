@@ -13,9 +13,9 @@ import { formatDate, formatName } from '../../utils/formatters'
 import { DOCUMENT_TYPE_LABELS } from '../../utils/constants'
 
 const DECISIONS = {
-  ACCEPT: 'accepted',
-  REJECT: 'rejected',
-  PENDING: 'under_review',
+  ACCEPT: 'accept',
+  REJECT: 'reject',
+  PENDING: 'pending',
 }
 
 // ── Score Bar ─────────────────────────────────────────────────────
