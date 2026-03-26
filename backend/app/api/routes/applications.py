@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy.orm import joinedload
 
 from app.api.deps import (
     get_current_user,
@@ -53,7 +54,7 @@ def create_application(
     return new_application
 
 
-@router.put("/{application_id}/submit", response_model=ApplicationOut)
+@router.put("/{application_id}/edit", response_model=ApplicationOut)
 def update_application(
     application_id: int,
     application_data: ApplicationCreate,
@@ -74,8 +75,25 @@ def update_application(
     if application.status != "draft":
         raise HTTPException(status_code=400, detail="Cannot edit submitted application")
 
-    for key, value in application_data.dict().items():
+    # Update flat fields only — subjects are handled separately
+    data = application_data.dict()
+    subjects = data.pop("subjects")
+
+    for key, value in data.items():
         setattr(application, key, value)
+
+    # Replace subjects: delete existing rows then insert new ones
+    db.query(ApplicationSubject).filter(
+        ApplicationSubject.application_id == application_id
+    ).delete()
+
+    for subject in subjects:
+        app_subject = ApplicationSubject(
+            application_id=application_id,
+            subject_id=subject["subject_id"],
+            mark=subject["mark"],
+        )
+        db.add(app_subject)
 
     db.commit()
     db.refresh(application)
@@ -103,17 +121,21 @@ def submit_application(
     if application.status != "draft":
         raise HTTPException(status_code=400, detail="Application already submitted")
 
+    # Set status to submitted immediately
+    application.status = ApplicationStatus.submitted
+    db.commit()
+
     # Run scoring engine
     evaluation = evaluate_application(db, application)
 
-    # Map decision to application status
+    # Map AI decision to application status
     decision = evaluation["decision"]
     if decision == "rejected":
         application.status = ApplicationStatus.rejected
-    elif decision == "screened":
-        application.status = ApplicationStatus.screened
+    elif decision == "recommended":
+        application.status = ApplicationStatus.recommended
     else:  # "review"
-        application.status = ApplicationStatus.pending
+        application.status = ApplicationStatus.under_review
 
     # Create a ScreeningResult record
     screening = ScreeningResult(
@@ -121,6 +143,7 @@ def submit_application(
         prediction_score=evaluation["score"],
         decision=decision,
         model_version=evaluation.get("evaluation_version", "rule-engine-v1"),
+        explanation=evaluation.get("explanation"),
     )
     db.add(screening)
     db.commit()
@@ -131,12 +154,31 @@ def submit_application(
 
 @router.get("/all", dependencies=[Depends(require_role("admin"))])
 def get_all_applications(db: Session = Depends(get_db)):
-    return db.query(Application).all()
+    return (
+        db.query(Application)
+        .options(
+            joinedload(Application.course),
+            joinedload(Application.subjects).joinedload(ApplicationSubject.subject),
+            joinedload(Application.documents),
+            joinedload(Application.screening_result),
+        )
+        .all()
+    )
 
 
 @router.get("/pending", dependencies=[Depends(require_role("admin"))])
 def get_pending_applications(db: Session = Depends(get_db)):
-    return db.query(Application).filter(Application.status == "pending").all()
+    return (
+        db.query(Application)
+        .options(
+            joinedload(Application.course),
+            joinedload(Application.subjects).joinedload(ApplicationSubject.subject),
+            joinedload(Application.documents),
+            joinedload(Application.screening_result),
+        )
+        .filter(Application.status == "pending")
+        .all()
+    )
 
 
 @router.get("/me")
@@ -145,16 +187,43 @@ def get_my_applications(
     db: Session = Depends(get_db),
 ):
     applications = (
-        db.query(Application).filter(Application.user_id == current_user.id).all()
+        db.query(Application)
+        .options(
+            joinedload(Application.course),
+            joinedload(Application.subjects).joinedload(ApplicationSubject.subject),
+            joinedload(Application.documents),
+            joinedload(Application.screening_result),
+        )
+        .filter(Application.user_id == current_user.id)
+        .all()
     )
-
     return applications
 
 
 @router.get("/{application_id}")
 def get_application(
-    application=Depends(require_application_owner_or_admin),
+    application_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
+    application = (
+        db.query(Application)
+        .options(
+            joinedload(Application.course),
+            joinedload(Application.subjects).joinedload(ApplicationSubject.subject),
+            joinedload(Application.documents),
+            joinedload(Application.screening_result),
+        )
+        .filter(Application.id == application_id)
+        .first()
+    )
+
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+
+    if current_user.role != "admin" and application.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
     return application
 
 
@@ -166,17 +235,15 @@ def update_application_status(
     application_id: int,
     status_update: ApplicationStatusUpdate,
     db: Session = Depends(get_db),
-    admin_user: User = Depends(require_admin),  # explicitly a User object
+    admin_user: User = Depends(require_admin),
 ):
     application = db.query(Application).filter(Application.id == application_id).first()
 
     if not application:
         raise HTTPException(status_code=404, detail="Application not found")
 
-    # --- Update application status ---
     application.status = status_update.status
 
-    # --- Optionally record a new ScreeningResult or link existing ---
     screening = (
         db.query(ScreeningResult)
         .filter(ScreeningResult.application_id == application.id)
@@ -184,16 +251,12 @@ def update_application_status(
     )
 
     if screening:
-        # --- Track which admin updated the status ---
         screening.reviewed_by_admin = True
-        screening.final_decision = status_update.status  # admin decision
+        screening.final_decision = status_update.status
         screening.reviewed_by_admin_id = admin_user.id
         screening.admin_notes = (
             f"Status changed via /status patch by admin {admin_user.email}"
         )
-    else:
-        # could create a placeholder if desired
-        pass
 
     db.commit()
     db.refresh(application)

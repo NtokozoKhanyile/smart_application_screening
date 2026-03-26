@@ -10,7 +10,7 @@ const STATUS_DESCRIPTIONS = {
     body: 'You have not submitted your application yet. Complete all steps and submit when you are ready.',
   },
   submitted: {
-    icon: '📤',
+    icon: '',
     color: 'bg-blue-50 border-blue-200 text-blue-800',
     heading: 'Your application has been submitted.',
     body: 'Your application has been received and is currently being evaluated by our AI screening system.',
@@ -28,13 +28,13 @@ const STATUS_DESCRIPTIONS = {
     body: 'The AI screening system has recommended your application for approval based on your subject marks. An admin will confirm the final decision.',
   },
   accepted: {
-    icon: '🎉',
+    icon: '',
     color: 'bg-green-50 border-green-200 text-green-800',
     heading: 'Congratulations! Your application has been accepted.',
     body: 'An admin has reviewed and accepted your application. You will be contacted with further instructions.',
   },
   rejected: {
-    icon: '❌',
+    icon: '',
     color: 'bg-red-50 border-red-200 text-red-800',
     heading: 'Your application was not successful.',
     body: 'Unfortunately your application did not meet the requirements. You can review the reason below and reapply with improved subject marks if eligible.',
