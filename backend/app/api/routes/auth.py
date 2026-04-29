@@ -5,18 +5,19 @@ from app.db.session import get_db
 from app.api.deps import get_current_user
 from app.db.models.user import User
 from app.services import auth as auth_service
-from app.schemas.user import UserResponse  # Assuming this exists or should be used
+from app.schemas.user import UserResponse
+from app.utils.security_helpers import rate_limit_auth
 
 router = APIRouter()
 
 
-@router.post("/register", status_code=status.HTTP_201_CREATED)
+@router.post("/register", status_code=status.HTTP_201_CREATED, dependencies=[Depends(rate_limit_auth)])
 def register(email: str, password: str, db: Session = Depends(get_db)):
     auth_service.register_user(db, email, password)
     return {"message": "User registered successfully"}
 
 
-@router.post("/login")
+@router.post("/login", dependencies=[Depends(rate_limit_auth)])
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db),
