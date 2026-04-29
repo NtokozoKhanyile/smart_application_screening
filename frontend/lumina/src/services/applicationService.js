@@ -9,4 +9,5 @@ export const applicationAPI = {
   submit: (id) => api.post(`/applications/${id}/submit`),
   updateStatus: (id, status) => api.patch(`/applications/${id}/status`, { status }),
   delete: (id) => api.delete(`/applications/${id}`),
-}
+  getAnalytics: (days) => api.get('/admin/analytics', { params: { days } }),
+  }
