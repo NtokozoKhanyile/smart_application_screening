@@ -1,6 +1,7 @@
 import enum
 from sqlalchemy import Column, Integer, Enum, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
+from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import datetime
 
 from app.db.base import Base
@@ -59,3 +60,9 @@ class Application(Base):
     subjects = relationship(
         "ApplicationSubject", back_populates="application", cascade="all, delete-orphan"
     )
+
+    @hybrid_property
+    def full_name(self):
+        if self.middle_name:
+            return f"{self.first_name} {self.middle_name} {self.surname}"
+        return f"{self.first_name} {self.surname}"

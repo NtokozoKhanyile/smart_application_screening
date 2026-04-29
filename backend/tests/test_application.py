@@ -220,7 +220,7 @@ def test_submit_application_with_subjects(client, auth_headers, db):
     assert response.status_code == 200
     data = response.json() 
     assert data["id"] == application.id
-    assert data["status"] == "screened"
+    assert data["status"] == "recommended"
 
 def test_submit_application_with_subjects_below_threshold(client, auth_headers, db):
     # Get the logged-in User
@@ -399,7 +399,7 @@ def test_submit_application_with_subjects_near_threshold(client, auth_headers, d
     assert response.status_code == 200
     data = response.json()
     assert data["id"] == application.id
-    assert data["status"] == "screened"
+    assert data["status"] == "under_review"
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

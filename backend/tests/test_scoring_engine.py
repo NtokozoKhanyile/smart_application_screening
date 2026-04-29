@@ -75,7 +75,8 @@ def test_evaluation_passes_threshold(db):
     application = make_application(db, user_id=1, course_id=course.id, subject_marks={"Math": 70, "Eng": 70})
 
     result = evaluate_application(db, application)
-    assert result["decision"] == "screened"
+    assert result["decision"] == "recommended"
+
     assert result["score"] >= 60
 
 
@@ -97,4 +98,4 @@ def test_evaluation_fails_minimum(db):
     application = make_application(db, user_id=1, course_id=course.id, subject_marks={"Bio": 40})
     result = evaluate_application(db, application)
     assert result["decision"] == "rejected"
-    assert "Minimum requirement" in result["explanation"]
+    assert "did not meet the minimum subject requirements" in result["explanation"]

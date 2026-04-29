@@ -83,6 +83,7 @@ class ApplicationResponse(BaseModel):
     first_name: str
     middle_name: str | None = None
     surname: str
+    full_name: str
     email: str
     phone_number: str | None = None
     id_number: str | None = None

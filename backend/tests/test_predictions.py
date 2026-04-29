@@ -35,7 +35,7 @@ def make_application(db, user, course, marks):
         guardian_name="G",
         guardian_phone_number="2",
         guardian_email="g@x.com",
-        status="pending",
+        status="under_review",
     )
     db.add(app)
     db.commit()
@@ -69,7 +69,7 @@ def test_screen_application_endpoint(client, db, admin_headers, auth_headers):
     assert res.status_code == 200
     body = res.json()
     assert body["prediction_score"] >= 0
-    assert body["decision"] in ["screened", "rejected"]
+    assert body["decision"] in ["recommended", "review", "rejected"]
 
     # ensure ScreeningResult persisted
     record = db.query(ScreeningResult).filter(ScreeningResult.application_id == app.id).first()

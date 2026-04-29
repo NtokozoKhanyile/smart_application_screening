@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, Integer, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from app.db.base import Base
 
@@ -15,3 +15,7 @@ class ApplicationSubject(Base):
 
     application = relationship("Application", back_populates="subjects")
     subject = relationship("Subject")
+
+    __table_args__ = (
+        UniqueConstraint("application_id", "subject_id", name="uix_app_subject"),
+    )

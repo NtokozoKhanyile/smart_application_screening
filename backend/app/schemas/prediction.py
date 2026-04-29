@@ -17,6 +17,14 @@ class ScreeningResultCreate(BaseModel):
         return v
 
 
+class ReviewerInfo(BaseModel):
+    id: int
+    email: str
+
+    class Config:
+        from_attributes = True
+
+
 class ScreeningResultOut(BaseModel):
     id: int
     application_id: int
@@ -24,9 +32,11 @@ class ScreeningResultOut(BaseModel):
     decision: str
     model_version: str
     reviewed_by_admin: bool
+    reviewed_by_admin_id: Optional[int] = None
     explanation: Optional[str] = None
     final_decision: Optional[str] = None
     admin_notes: Optional[str] = None
+    reviewer: Optional[ReviewerInfo] = None
 
     class Config:
         from_attributes = True
