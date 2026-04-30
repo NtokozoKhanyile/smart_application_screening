@@ -1,6 +1,8 @@
 # Build stage
 FROM node:20-alpine as build-stage
 
+RUN apk add --no-cache libc6-compat
+
 WORKDIR /app
 
 ARG VITE_API_URL

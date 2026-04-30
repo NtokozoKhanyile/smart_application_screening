@@ -26,9 +26,9 @@ services:
     container_name: ai_app_backend
     restart: always
     environment:
-      - DATABASE_URL=postgresql://postgres:password@db:5432/ai_app_db
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-ai_app_db}
       - REDIS_URL=redis://redis:6379/0
-      - SECRET_KEY=REDACTED
+      - SECRET_KEY=${SECRET_KEY:-REDACTED}
       - ALGORITHM=HS256
       - ACCESS_TOKEN_EXPIRE_MINUTES=1440
       - FRONTEND_URL=http://localhost:3000
