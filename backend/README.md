@@ -12,16 +12,19 @@ The backend is a **FastAPI** application that handles university application sub
 
 ## Quick Start
 
-### Prerequisites
-- Python 3.10+
-- Virtual environment (venv)
+### Docker (Recommended)
+From the project root:
+```bash
+docker-compose up --build
+```
 
-### Installation
+### Manual Installation
 1. `cd backend`
 2. `python -m venv venv`
 3. `source venv/bin/activate` (or `venv\Scripts\activate` on Windows)
 4. `pip install -r requirements.txt`
-5. `uvicorn app.main:app --reload`
+5. Configure `.env` with `DATABASE_URL` and `REDIS_URL`.
+6. `uvicorn app.main:app --reload`
 
 ---
 

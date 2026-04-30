@@ -4,6 +4,7 @@ from typing import Optional
 
 class Settings(BaseSettings):
     database_url: str
+    redis_url: Optional[str] = "redis://localhost:6379/0"
     SECRET_KEY: str
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int

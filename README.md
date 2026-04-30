@@ -35,7 +35,22 @@ A modern, full-stack university application screening system that leverages AI t
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start (Recommended)
+
+The easiest way to run the entire stack (Frontend, Backend, Database, and Redis) is using Docker Compose:
+
+```bash
+docker-compose up --build
+```
+
+- **Frontend:** http://localhost:3000
+- **Backend API:** http://localhost:8000
+- **API Docs:** http://localhost:8000/docs
+- **Redis:** localhost:6379
+
+---
+
+## 🛠 Manual Setup (Development)
 
 ### Backend Setup
 ```bash
@@ -43,21 +58,9 @@ cd backend
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env  # Configure your database
+cp .env.example .env  # Configure your database and REDIS_URL
 alembic upgrade head
 uvicorn app.main:app --reload
-```
-
-API will be available at `http://localhost:8000`  
-Interactive API docs: `http://localhost:8000/docs`
-
-→ **[Full backend documentation →](backend/README.md)**
-
-### Frontend Setup
-```bash
-cd frontend
-npm install
-npm run dev
 ```
 
 → **[Frontend documentation →](frontend/README.md)** (coming soon)
