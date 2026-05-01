@@ -14,5 +14,4 @@ pip-selfcheck.json
 .pytest_cache
 .vscode
 Dockerfile
-start.sh
 uploads/
