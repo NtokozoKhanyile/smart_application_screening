@@ -14,7 +14,7 @@ var tags = { 'azd-env-name': environmentName }
 
 // Organize resources in a resource group
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
-  name: !empty(resourceGroupName) ? resourceGroupName : '${abbrs.resourcesResourceGroups}${environmentName}-${location}'
+  name: 'rg-lumina-prod-northeurope'
   location: location
   tags: tags
 }
