@@ -3,6 +3,7 @@ param location string = resourceGroup().location
 param tags object = {}
 
 param containerAppsEnvironmentName string
+param containerRegistryName string = ''
 param serviceName string = 'backend'
 param env array = []
 param externalIngress bool = true
@@ -18,6 +19,12 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
   properties: {
     managedEnvironmentId: resourceId('Microsoft.App/managedEnvironments', containerAppsEnvironmentName)
     configuration: {
+      registries: !empty(containerRegistryName) ? [
+        {
+          server: '${containerRegistryName}.azurecr.io'
+          identity: 'system'
+        }
+      ] : []
       ingress: {
         external: externalIngress
         targetPort: targetPort

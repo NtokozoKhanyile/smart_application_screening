@@ -49,6 +49,7 @@ module backend './core/host/container-app.bicep' = {
     name: '${abbrs.appContainerApps}backend-${resourceToken}'
     location: location
     containerAppsEnvironmentName: '${abbrs.appManagedEnvironments}${resourceToken}'
+    containerRegistryName: containerRegistry.name
     targetPort: 8000
     tags: union(tags, { 'azd-service-name': 'backend' })
     env: [
@@ -71,6 +72,7 @@ module frontend './core/host/container-app.bicep' = {
     name: '${abbrs.appContainerApps}frontend-${resourceToken}'
     location: location
     containerAppsEnvironmentName: '${abbrs.appManagedEnvironments}${resourceToken}'
+    containerRegistryName: containerRegistry.name
     targetPort: 80
     tags: union(tags, { 'azd-service-name': 'frontend' })
     env: [
@@ -79,6 +81,26 @@ module frontend './core/host/container-app.bicep' = {
         value: backend.outputs.uri
       }
     ]
+  }
+}
+
+resource acrPullRoleBackend 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: containerRegistry
+  name: guid(containerRegistry.id, backend.name, 'AcrPull')
+  properties: {
+    principalId: backend.outputs.principalId
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-a505-4991-8403-ba071878b6ca')
+    principalType: 'ServicePrincipal'
+  }
+}
+
+resource acrPullRoleFrontend 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: containerRegistry
+  name: guid(containerRegistry.id, frontend.name, 'AcrPull')
+  properties: {
+    principalId: frontend.outputs.principalId
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-a505-4991-8403-ba071878b6ca')
+    principalType: 'ServicePrincipal'
   }
 }
 
