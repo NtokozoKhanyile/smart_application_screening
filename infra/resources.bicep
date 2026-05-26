@@ -17,95 +17,29 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing
   name: '${abbrs.insightsApplicationInsights}${resourceToken}'
 }
 
-// Container Apps Environment
-resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing = {
-  name: '${abbrs.appManagedEnvironments}${resourceToken}'
-}
-
 // Container Registry
-resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-07-01' = {
+resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
   name: '${abbrs.containerRegistryRegistries}${resourceToken}'
-  location: location
-  tags: tags
-  sku: {
-    name: 'Standard'
-  }
-  properties: {
-    adminUserEnabled: true
-  }
 }
 
 // Key Vault for secrets
-resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
+resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
   name: '${abbrs.keyVaultVaults}${resourceToken}'
-  location: location
-  tags: tags
-  properties: {
-    tenantId: subscription().tenantId
-    sku: {
-      family: 'A'
-      name: 'standard'
-    }
-    enableRbacAuthorization: true
-  }
 }
 
 // PostgreSQL Flexible Server
-resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2023-06-01-preview' = {
+resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2023-06-01-preview' existing = {
   name: '${abbrs.dBforPostgreSQLServers}${resourceToken}'
-  location: location
-  tags: tags
-  sku: {
-    name: 'Standard_B1ms'
-    tier: 'Burstable'
-  }
-  properties: {
-    version: '15'
-    administratorLogin: 'psqladmin'
-    administratorLoginPassword: postgresPassword
-    storage: {
-      storageSizeGB: 32
-    }
-    backup: {
-      backupRetentionDays: 7
-      geoRedundantBackup: 'Disabled'
-    }
-  }
 }
 
-resource postgresDatabase 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2023-06-01-preview' = {
+resource postgresDatabase 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2023-06-01-preview' existing = {
   parent: postgresServer
   name: 'ai_app_db'
 }
 
-resource postgresFirewall 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2023-06-01-preview' = {
-  parent: postgresServer
-  name: 'AllowAllAzureServices'
-  properties: {
-    startIpAddress: '0.0.0.0'
-    endIpAddress: '0.0.0.0'
-  }
-}
-
 // Storage Account for blobs
-resource storage 'Microsoft.Storage/storageAccounts@2023-01-01' = {
+resource storage 'Microsoft.Storage/storageAccounts@2023-01-01' existing = {
   name: '${abbrs.storageStorageAccounts}${resourceToken}'
-  location: location
-  tags: tags
-  sku: {
-    name: 'Standard_LRS'
-  }
-  kind: 'StorageV2'
-}
-
-resource blobServices 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01' = {
-  parent: storage
-  name: 'default'
-}
-
-resource uploadsContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
-  parent: blobServices
-  name: 'uploads'
 }
 
 // Backend Container App
@@ -114,7 +48,7 @@ module backend './core/host/container-app.bicep' = {
   params: {
     name: '${abbrs.appContainerApps}backend-${resourceToken}'
     location: location
-    containerAppsEnvironmentName: containerAppsEnvironment.name
+    containerAppsEnvironmentName: '${abbrs.appManagedEnvironments}${resourceToken}'
     targetPort: 8000
     tags: union(tags, { 'azd-service-name': 'backend' })
     env: [
@@ -136,7 +70,7 @@ module frontend './core/host/container-app.bicep' = {
   params: {
     name: '${abbrs.appContainerApps}frontend-${resourceToken}'
     location: location
-    containerAppsEnvironmentName: containerAppsEnvironment.name
+    containerAppsEnvironmentName: '${abbrs.appManagedEnvironments}${resourceToken}'
     targetPort: 80
     tags: union(tags, { 'azd-service-name': 'frontend' })
     env: [
