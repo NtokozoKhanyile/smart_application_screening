@@ -6,7 +6,6 @@ param containerAppsEnvironmentName string
 param containerRegistryName string = ''
 param serviceName string = 'backend'
 param env array = []
-param secrets array = []
 param externalIngress bool = true
 param targetPort int = 8000
 
@@ -20,7 +19,6 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
   properties: {
     managedEnvironmentId: resourceId('Microsoft.App/managedEnvironments', containerAppsEnvironmentName)
     configuration: {
-      secrets: secrets
       registries: !empty(containerRegistryName) ? [
         {
           server: '${containerRegistryName}.azurecr.io'
