@@ -1,18 +1,13 @@
 targetScope = 'subscription'
 
-@minLength(1)
-@maxLength(64)
 @description('Name of the environment which is used to generate a short unique hash used in all resources.')
 param environmentName string
 
-@minLength(1)
-@description('Primary location for all resources')
-param location string
-
 param resourceGroupName string = ''
 
-@description('The unique token to use for resource naming. If empty, it will be generated.')
-param resourceToken string = toLower(uniqueString(subscription().id, environmentName, location, 'v5'))
+// Hardcoded to match your existing provisioned resources
+var location = 'northeurope'
+var resourceToken = 'u6qh5lr5owz3e'
 
 var abbrs = loadJsonContent('./abbreviations.json')
 var tags = { 'azd-env-name': environmentName }
