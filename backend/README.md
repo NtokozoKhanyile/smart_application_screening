@@ -43,9 +43,15 @@ docker-compose up --build
 ---
 
 ## Testing
-Run the suite with environment variables:
+Run the suite using pytest:
 ```bash
-$env:DATABASE_URL='sqlite:///./test.db'; $env:SECRET_KEY='...'; pytest backend/tests
+# From the backend directory
+pytest
+```
+
+To run with coverage:
+```bash
+pytest --cov=app
 ```
 
 **Last updated:** April 2026

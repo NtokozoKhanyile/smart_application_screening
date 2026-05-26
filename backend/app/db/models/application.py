@@ -2,7 +2,7 @@ import enum
 from sqlalchemy import Column, Integer, Enum, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.hybrid import hybrid_property
-from datetime import datetime
+from datetime import datetime, UTC
 
 from app.db.base import Base
 
@@ -22,8 +22,8 @@ class Application(Base):
     id = Column(Integer, primary_key=True, index=True)
 
     # Ownership
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False, index=True)
 
     # Personal info
     first_name = Column(String, nullable=False)
@@ -41,21 +41,25 @@ class Application(Base):
 
     # Status and timestamps
     status = Column(
-        Enum(ApplicationStatus), default=ApplicationStatus.draft, nullable=False
+        Enum(ApplicationStatus),
+        default=ApplicationStatus.draft,
+        nullable=False,
+        index=True,
     )
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC), index=True)
 
     documents = relationship(
         "Document", back_populates="application", cascade="all, delete-orphan"
     )
 
     screening_result = relationship(
-        "ScreeningResult", back_populates="application", cascade="all, delete-orphan", uselist=False
+        "ScreeningResult",
+        back_populates="application",
+        cascade="all, delete-orphan",
+        uselist=False,
     )
 
-    course = relationship(
-        "Course", back_populates="applications"
-    )
+    course = relationship("Course", back_populates="applications")
 
     subjects = relationship(
         "ApplicationSubject", back_populates="application", cascade="all, delete-orphan"

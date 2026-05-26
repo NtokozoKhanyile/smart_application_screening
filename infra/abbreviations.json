@@ -1,0 +1,11 @@
+{
+  "resourcesResourceGroups": "rg-",
+  "storageStorageAccounts": "st",
+  "insightsLogAnalytics": "log-",
+  "insightsApplicationInsights": "appins-",
+  "appManagedEnvironments": "cae-",
+  "containerRegistryRegistries": "cr",
+  "appContainerApps": "ca-",
+  "dBforPostgreSQLServers": "psql-",
+  "keyVaultVaults": "kv-"
+}

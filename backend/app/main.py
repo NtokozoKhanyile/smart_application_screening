@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.core.config import settings
 from app.db.session import engine
 from app.db.base import Base
 from app.api.router import api_router
@@ -15,7 +16,7 @@ app = FastAPI(
 # CORS configuration – allow frontend origins to call the API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # adjust to specific domains in production
+    allow_origins=[settings.frontend_url],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -40,4 +41,3 @@ def root():
 @app.get("/health", tags=["Health"])
 def health_check():
     return {"status": "ok"}
-

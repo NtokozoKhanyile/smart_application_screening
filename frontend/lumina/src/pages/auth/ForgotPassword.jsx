@@ -20,7 +20,7 @@ const ForgotPassword = () => {
     formState: { errors, isSubmitting },
   } = useForm({ resolver: zodResolver(schema) })
 
-  const onSubmit = async (data) => {
+  const onSubmit = async () => {
     // Backend does not have a reset endpoint yet
     // We simulate the flow for now
     await new Promise((resolve) => setTimeout(resolve, 1000))

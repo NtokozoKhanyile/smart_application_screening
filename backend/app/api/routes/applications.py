@@ -37,7 +37,9 @@ def update_application(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return service.update_application(db, application_id, current_user.id, application_data)
+    return service.update_application(
+        db, application_id, current_user.id, application_data
+    )
 
 
 @router.post("/{application_id}/submit", response_model=ApplicationOut)
@@ -51,16 +53,14 @@ def submit_application(
 
 @router.get("/all", response_model=List[ApplicationOut])
 def get_all_applications(
-    db: Session = Depends(get_db),
-    admin_user: User = Depends(require_role("admin"))
+    db: Session = Depends(get_db), admin_user: User = Depends(require_role("admin"))
 ):
     return service.get_all_applications(db)
 
 
 @router.get("/pending", response_model=List[ApplicationOut])
 def get_pending_applications(
-    db: Session = Depends(get_db),
-    admin_user: User = Depends(require_role("admin"))
+    db: Session = Depends(get_db), admin_user: User = Depends(require_role("admin"))
 ):
     return service.get_all_applications(db, status="under_review")
 
@@ -104,26 +104,13 @@ def update_application_status(
     db: Session = Depends(get_db),
     admin_user: User = Depends(require_admin),
 ):
-    # This logic could also be moved to service, but keeping it here for now as it touches ScreeningResult specifically
     application = service.get_application_by_id(db, application_id)
-
     if not application:
         raise HTTPException(status_code=404, detail="Application not found")
 
-    application.status = status_update.status
-
-    if application.screening_result:
-        application.screening_result.reviewed_by_admin = True
-        application.screening_result.final_decision = status_update.status
-        application.screening_result.reviewed_by_admin_id = admin_user.id
-        application.screening_result.admin_notes = (
-            f"Status changed via /status patch by admin {admin_user.email}"
-        )
-
-    db.commit()
-    db.refresh(application)
-
-    return application
+    return service.update_application_status(
+        db, application, status_update.status, admin_user.id
+    )
 
 
 @router.delete("/{application_id}")

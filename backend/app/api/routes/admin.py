@@ -17,7 +17,7 @@ def get_admin_dashboard_stats(db: Session = Depends(get_db)):
 @router.get("/analytics", dependencies=[Depends(require_admin)])
 def get_admin_analytics(
     db: Session = Depends(get_db),
-    days: Optional[int] = Query(None, description="Filter data by last N days")
+    days: Optional[int] = Query(None, description="Filter data by last N days"),
 ):
     """Returns comprehensive analytics for the admin dashboard."""
     return analytics_service.get_comprehensive_analytics(db, days=days)

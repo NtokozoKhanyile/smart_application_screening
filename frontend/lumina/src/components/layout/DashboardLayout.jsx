@@ -36,6 +36,68 @@ const navItems = [
   },
 ]
 
+const SidebarContent = ({ user, location, collapsed = false, handleLogout }) => (
+  <>
+    {/* Logo */}
+    <div className="flex items-center gap-3 px-4 py-5 border-b border-navy-600">
+      <div className="w-8 h-8 bg-gold-500 rounded-lg flex items-center justify-center flex-shrink-0">
+        <span className="text-white font-bold text-sm">L</span>
+      </div>
+      {!collapsed && (
+        <div>
+          <p className="text-white font-bold text-sm">{APP_NAME}</p>
+          <p className="text-navy-300 text-xs">Applicant Portal</p>
+        </div>
+      )}
+    </div>
+
+    {/* Nav Items */}
+    <nav className="flex-1 px-3 py-4 space-y-1">
+      {navItems.map((item) => (
+        <Link
+          key={item.path + item.label}
+          to={item.path}
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors duration-200 ${
+            location.pathname === item.path
+              ? 'bg-gold-500 text-white'
+              : 'text-navy-200 hover:bg-navy-600 hover:text-white'
+          }`}
+        >
+          {item.icon}
+          {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
+        </Link>
+      ))}
+    </nav>
+
+    {/* User Menu */}
+    <div className="px-3 py-4 border-t border-navy-600">
+      {!collapsed && (
+        <div className="flex items-center gap-3 px-3 py-2 mb-2">
+          <div className="w-8 h-8 bg-gold-500 rounded-full flex items-center justify-center flex-shrink-0">
+            <span className="text-white text-xs font-bold">
+              {user?.email?.[0]?.toUpperCase()}
+            </span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-white text-xs font-medium truncate">{user?.email}</p>
+            <p className="text-navy-300 text-xs capitalize">{user?.role}</p>
+          </div>
+        </div>
+      )}
+      <button
+        onClick={handleLogout}
+        className="flex items-center gap-3 px-3 py-2 w-full text-navy-200 hover:bg-navy-600 hover:text-white rounded-lg transition-colors duration-200"
+      >
+        <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+        {!collapsed && <span className="text-sm">Logout</span>}
+      </button>
+    </div>
+  </>
+)
+
 const DashboardLayout = ({ children }) => {
   const { user, logout } = useAuth()
   const location = useLocation()
@@ -47,6 +109,7 @@ const DashboardLayout = ({ children }) => {
 
   // Close mobile drawer on route change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMobileOpen(false)
   }, [location.pathname])
 
@@ -68,68 +131,6 @@ const DashboardLayout = ({ children }) => {
     navigate(ROUTES.LOGIN)
   }
 
-  const SidebarContent = ({ collapsed = false }) => (
-    <>
-      {/* Logo */}
-      <div className="flex items-center gap-3 px-4 py-5 border-b border-navy-600">
-        <div className="w-8 h-8 bg-gold-500 rounded-lg flex items-center justify-center flex-shrink-0">
-          <span className="text-white font-bold text-sm">L</span>
-        </div>
-        {!collapsed && (
-          <div>
-            <p className="text-white font-bold text-sm">{APP_NAME}</p>
-            <p className="text-navy-300 text-xs">Applicant Portal</p>
-          </div>
-        )}
-      </div>
-
-      {/* Nav Items */}
-      <nav className="flex-1 px-3 py-4 space-y-1">
-        {navItems.map((item) => (
-          <Link
-            key={item.path + item.label}
-            to={item.path}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors duration-200 ${
-              location.pathname === item.path
-                ? 'bg-gold-500 text-white'
-                : 'text-navy-200 hover:bg-navy-600 hover:text-white'
-            }`}
-          >
-            {item.icon}
-            {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
-          </Link>
-        ))}
-      </nav>
-
-      {/* User Menu */}
-      <div className="px-3 py-4 border-t border-navy-600">
-        {!collapsed && (
-          <div className="flex items-center gap-3 px-3 py-2 mb-2">
-            <div className="w-8 h-8 bg-gold-500 rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-white text-xs font-bold">
-                {user?.email?.[0]?.toUpperCase()}
-              </span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-white text-xs font-medium truncate">{user?.email}</p>
-              <p className="text-navy-300 text-xs capitalize">{user?.role}</p>
-            </div>
-          </div>
-        )}
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2 w-full text-navy-200 hover:bg-navy-600 hover:text-white rounded-lg transition-colors duration-200"
-        >
-          <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-          {!collapsed && <span className="text-sm">Logout</span>}
-        </button>
-      </div>
-    </>
-  )
-
   return (
     <div className="min-h-screen bg-gray-50 flex">
 
@@ -148,7 +149,12 @@ const DashboardLayout = ({ children }) => {
         lg:hidden
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <SidebarContent collapsed={false} />
+        <SidebarContent
+          user={user}
+          location={location}
+          collapsed={false}
+          handleLogout={handleLogout}
+        />
       </aside>
 
       {/* ── Desktop Sidebar ── */}
@@ -157,7 +163,12 @@ const DashboardLayout = ({ children }) => {
         transition-all duration-300
         ${sidebarOpen ? 'w-64' : 'w-16'}
       `}>
-        <SidebarContent collapsed={!sidebarOpen} />
+        <SidebarContent
+          user={user}
+          location={location}
+          collapsed={!sidebarOpen}
+          handleLogout={handleLogout}
+        />
       </aside>
 
       {/* ── Main Content ── */}

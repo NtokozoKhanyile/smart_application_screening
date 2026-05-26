@@ -63,7 +63,7 @@ alembic upgrade head
 uvicorn app.main:app --reload
 ```
 
-→ **[Frontend documentation →](frontend/README.md)** (coming soon)
+→ **[Frontend documentation →](frontend/lumina/README.md)** 
 
 ---
 

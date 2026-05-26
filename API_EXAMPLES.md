@@ -6,7 +6,13 @@ This guide provides practical curl examples for testing the AI Application Scree
 
 ### Register a new user
 ```bash
-curl -X POST "http://localhost:8000/auth/register?email=student@example.com&password=StudentPass123"
+curl -X POST "http://localhost:8000/auth/register" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "student@example.com",
+    "password": "StudentPass123",
+    "full_name": "John Doe"
+  }'
 ```
 
 ### Login and get token

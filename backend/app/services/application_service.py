@@ -5,7 +5,7 @@ from typing import List, Optional
 from app.db.models.application import Application, ApplicationStatus
 from app.db.models.application_subject import ApplicationSubject
 from app.db.models.prediction import ScreeningResult
-from app.schemas.application import ApplicationCreate, ApplicationStatus as ApplicationStatusEnum
+from app.schemas.application import ApplicationCreate
 from app.services.scoring_engine import evaluate_application
 
 
@@ -37,7 +37,9 @@ def get_user_applications(db: Session, user_id: int) -> List[Application]:
     )
 
 
-def get_all_applications(db: Session, status: Optional[str] = None) -> List[Application]:
+def get_all_applications(
+    db: Session, status: Optional[str] = None
+) -> List[Application]:
     query = db.query(Application).options(
         joinedload(Application.course),
         joinedload(Application.subjects).joinedload(ApplicationSubject.subject),
@@ -49,14 +51,14 @@ def get_all_applications(db: Session, status: Optional[str] = None) -> List[Appl
     return query.all()
 
 
-def create_application(db: Session, user_id: int, data: ApplicationCreate) -> Application:
+def create_application(
+    db: Session, user_id: int, data: ApplicationCreate
+) -> Application:
     application_data = data.dict()
     subjects_data = application_data.pop("subjects")
 
     new_application = Application(
-        user_id=user_id,
-        status=ApplicationStatus.draft,
-        **application_data
+        user_id=user_id, status=ApplicationStatus.draft, **application_data
     )
 
     db.add(new_application)
@@ -124,6 +126,24 @@ def delete_application(db: Session, application: Application) -> None:
     db.commit()
 
 
+def update_application_status(
+    db: Session, application: Application, new_status: ApplicationStatus, admin_id: int
+) -> Application:
+    application.status = new_status
+
+    if application.screening_result:
+        application.screening_result.reviewed_by_admin = True
+        application.screening_result.final_decision = new_status
+        application.screening_result.reviewed_by_admin_id = admin_id
+        application.screening_result.admin_notes = (
+            f"Status updated manually by admin {admin_id}"
+        )
+
+    db.commit()
+    db.refresh(application)
+    return application
+
+
 def submit_application(db: Session, application_id: int, user_id: int) -> Application:
     application = (
         db.query(Application)
@@ -172,7 +192,7 @@ def submit_application(db: Session, application_id: int, user_id: int) -> Applic
 
 def get_user_application_stats(db: Session, user_id: int):
     applications = db.query(Application).filter(Application.user_id == user_id).all()
-    
+
     stats = {
         "total": len(applications),
         "draft": 0,
@@ -180,10 +200,10 @@ def get_user_application_stats(db: Session, user_id: int):
         "under_review": 0,
         "recommended": 0,
         "accepted": 0,
-        "rejected": 0
+        "rejected": 0,
     }
-    
+
     for app in applications:
         stats[app.status.value] += 1
-        
+
     return stats

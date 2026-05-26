@@ -28,7 +28,7 @@ def get_screening_stats(db: Session):
 
     admin_overrides = (
         db.query(func.count(ScreeningResult.id))
-        .filter(ScreeningResult.reviewed_by_admin == True)
+        .filter(ScreeningResult.reviewed_by_admin)
         .scalar()
     )
 

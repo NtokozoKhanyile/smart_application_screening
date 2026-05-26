@@ -2,8 +2,6 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.db.models.course import Course, CourseSubjectRequirement
-from app.db.models.user import User
 from app.schemas.courses import (
     CourseCreate,
     CourseResponse,
@@ -12,26 +10,19 @@ from app.schemas.courses import (
     CourseSubjectRequirementUpdate,
 )
 from app.api.deps import require_admin
+from app.services import course_service as service
 
 router = APIRouter()
 
 
 @router.post("/", response_model=CourseResponse, dependencies=[Depends(require_admin)])
 def create_course(course_in: CourseCreate, db: Session = Depends(get_db)):
-    existing = db.query(Course).filter(Course.name == course_in.name).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Course already exists")
-
-    course = Course(**course_in.model_dump())
-    db.add(course)
-    db.commit()
-    db.refresh(course)
-    return course
+    return service.create_course(db, course_in)
 
 
 @router.get("/", response_model=list[CourseResponse])
 def list_courses(db: Session = Depends(get_db)):
-    return db.query(Course).all()
+    return service.get_all_courses(db)
 
 
 @router.patch(
@@ -40,27 +31,10 @@ def list_courses(db: Session = Depends(get_db)):
 def update_course(
     course_id: int, course_in: CourseUpdate, db: Session = Depends(get_db)
 ):
-    course = db.query(Course).filter(Course.id == course_id).first()
+    course = service.get_course_by_id(db, course_id)
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
-
-    if course_in.name is not None:
-        existing = (
-            db.query(Course)
-            .filter(Course.name == course_in.name, Course.id != course_id)
-            .first()
-        )
-        if existing:
-            raise HTTPException(status_code=400, detail="Course name already Exists")
-
-        course.name = course_in.name
-
-    if course_in.approval_threshold is not None:
-        course.approval_threshold = course_in.approval_threshold
-
-    db.commit()
-    db.refresh(course)
-    return course
+    return service.update_course(db, course, course_in)
 
 
 @router.post("/{course_id}/requirements")
@@ -68,39 +42,12 @@ def add_course_requirement(
     course_id: int,
     requirement_in: CourseSubjectRequirementCreate,
     db: Session = Depends(get_db),
-    admin_user: User = Depends(require_admin),
+    admin_user=Depends(require_admin),
 ):
-    course = db.query(Course).filter(Course.id == course_id).first()
+    course = service.get_course_by_id(db, course_id)
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
-
-    # Prevent duplicate subject requirement
-    existing = (
-        db.query(CourseSubjectRequirement)
-        .filter(
-            CourseSubjectRequirement.course_id == course_id,
-            CourseSubjectRequirement.subject_id == requirement_in.subject_id,
-        )
-        .first()
-    )
-
-    if existing:
-        raise HTTPException(
-            status_code=400, detail="Requirement already exists for this subject"
-        )
-
-    requirement = CourseSubjectRequirement(
-        course_id=course_id,
-        subject_id=requirement_in.subject_id,
-        minimum_mark=requirement_in.minimum_mark,
-        weight=requirement_in.weight,
-    )
-
-    db.add(requirement)
-    db.commit()
-    db.refresh(requirement)
-
-    return requirement
+    return service.add_course_requirement(db, course_id, requirement_in)
 
 
 @router.patch("/{course_id}/requirements/{requirement_id}")
@@ -109,30 +56,12 @@ def update_course_requirement(
     requirement_id: int,
     requirement_in: CourseSubjectRequirementUpdate,
     db: Session = Depends(get_db),
-    admin_user: User = Depends(require_admin),
+    admin_user=Depends(require_admin),
 ):
-    requirement = (
-        db.query(CourseSubjectRequirement)
-        .filter(
-            CourseSubjectRequirement.id == requirement_id,
-            CourseSubjectRequirement.course_id == course_id,
-        )
-        .first()
-    )
-
+    requirement = service.get_requirement_by_id(db, requirement_id, course_id)
     if not requirement:
         raise HTTPException(status_code=404, detail="Requirement not found")
-
-    if requirement_in.minimum_mark is not None:
-        requirement.minimum_mark = requirement_in.minimum_mark
-
-    if requirement_in.weight is not None:
-        requirement.weight = requirement_in.weight
-
-    db.commit()
-    db.refresh(requirement)
-
-    return requirement
+    return service.update_course_requirement(db, requirement, requirement_in)
 
 
 @router.delete(
@@ -142,23 +71,13 @@ def delete_course_requirement(
     course_id: int,
     requirement_id: int,
     db: Session = Depends(get_db),
-    admin_user: User = Depends(require_admin),
+    admin_user=Depends(require_admin),
 ):
-    requirement = (
-        db.query(CourseSubjectRequirement)
-        .filter(
-            CourseSubjectRequirement.id == requirement_id,
-            CourseSubjectRequirement.course_id == course_id,
-        )
-        .first()
-    )
-
+    requirement = service.get_requirement_by_id(db, requirement_id, course_id)
     if not requirement:
         raise HTTPException(status_code=404, detail="Requirement not found")
 
-    db.delete(requirement)
-    db.commit()
-
+    service.delete_course_requirement(db, requirement)
     return {"detail": "Requirement deleted"}
 
 
@@ -166,19 +85,17 @@ def delete_course_requirement(
     "/{course_id}/requirements", response_model=list[CourseSubjectRequirementCreate]
 )
 def list_course_requirements(course_id: int, db: Session = Depends(get_db)):
-    course = db.query(Course).filter(Course.id == course_id).first()
+    course = service.get_course_by_id(db, course_id)
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
-
     return course.subject_requirements
 
 
 @router.delete("/{course_id}", dependencies=[Depends(require_admin)])
 def delete_course(course_id: int, db: Session = Depends(get_db)):
-    course = db.query(Course).filter(Course.id == course_id).first()
+    course = service.get_course_by_id(db, course_id)
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
 
-    db.delete(course)
-    db.commit()
+    service.delete_course(db, course)
     return {"detail": "Course deleted successfully"}

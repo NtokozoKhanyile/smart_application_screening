@@ -1,7 +1,3 @@
-import { useRef } from 'react'
-import useDebounce from '../../hooks/useDebounce'
-import { useEffect } from 'react'
-
 const FilterBar = ({
   searchValue,
   onSearchChange,

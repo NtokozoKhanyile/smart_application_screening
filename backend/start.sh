@@ -7,7 +7,12 @@ until alembic upgrade head; do
   sleep 2
 done
 
-echo "Database is ready - starting app"
+echo "Database is ready - starting migrations"
+alembic upgrade head
 
+echo "Seeding initial subjects..."
+python seed_subjects.py
+
+echo "Starting app"
 # Start the application
 uvicorn app.main:app --host 0.0.0.0 --port 8000

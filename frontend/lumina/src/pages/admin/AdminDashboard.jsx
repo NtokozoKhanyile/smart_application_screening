@@ -91,10 +91,6 @@ const AdminDashboard = () => {
     }
   }
 
-  const pendingCount = recentApplications.filter
-    ? stats?.total_screened - stats?.ai_approvals - stats?.ai_rejections
-    : null
-
   return (
     <AdminLayout>
       {/* Header */}

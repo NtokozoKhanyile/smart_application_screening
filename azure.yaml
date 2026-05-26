@@ -1,0 +1,20 @@
+name: ai-application-screening
+metadata:
+  template: ai-application-screening-aca
+services:
+  backend:
+    project: ./backend
+    language: python
+    host: containerapp
+    docker:
+      remoteBuild: true
+  frontend:
+    project: ./frontend/lumina
+    language: js
+    host: containerapp
+    docker:
+      remoteBuild: true
+    config:
+      buildArgs:
+        - name: VITE_API_URL
+          value: ${BACKEND_URI}

@@ -106,9 +106,9 @@ def admin_override_screening(
     result.reviewed_by_admin_id = current_user.id
 
     # Auto-update the application status to match admin decision
-    application = db.query(Application).filter(
-        Application.id == result.application_id
-    ).first()
+    application = (
+        db.query(Application).filter(Application.id == result.application_id).first()
+    )
 
     if application:
         if review.final_decision == "accepted":

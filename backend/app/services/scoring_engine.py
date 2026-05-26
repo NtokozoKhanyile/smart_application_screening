@@ -1,8 +1,7 @@
+from app.core.config import settings
 from sqlalchemy.orm import Session
 from app.db.models.course import Course
 from app.db.models.application import Application
-
-EVALUATION_VERSION = "rules_v1.0.2"
 
 
 def evaluate_application(db: Session, application: Application):
@@ -25,7 +24,7 @@ def evaluate_application(db: Session, application: Application):
             "decision": "review",
             "score": 0,
             "explanation": "This course is not fully configured for automated screening. An admin will review your application manually.",
-            "evaluation_version": EVALUATION_VERSION,
+            "evaluation_version": settings.evaluation_version,
         }
 
     # Build subject mark dict keyed by subject name
@@ -70,7 +69,7 @@ def evaluate_application(db: Session, application: Application):
                 f"Your application did not meet the minimum subject requirements for {course.name}. "
                 f"The following subject(s) did not meet the minimum mark: {reasons}."
             ),
-            "evaluation_version": EVALUATION_VERSION,
+            "evaluation_version": settings.evaluation_version,
         }
 
     if final_score >= course.approval_threshold:
@@ -82,7 +81,7 @@ def evaluate_application(db: Session, application: Application):
                 f"Your weighted score of {final_score}% meets the approval threshold of {course.approval_threshold}%. "
                 f"Your application is recommended for approval."
             ),
-            "evaluation_version": EVALUATION_VERSION,
+            "evaluation_version": settings.evaluation_version,
         }
 
     if final_score >= course.approval_threshold - 10:
@@ -94,7 +93,7 @@ def evaluate_application(db: Session, application: Application):
                 f"Your weighted score of {final_score}% is close to the approval threshold of {course.approval_threshold}%. "
                 f"An admin will review your application to make a final decision."
             ),
-            "evaluation_version": EVALUATION_VERSION,
+            "evaluation_version": settings.evaluation_version,
         }
 
     return {
@@ -105,5 +104,5 @@ def evaluate_application(db: Session, application: Application):
             f"Your weighted score of {final_score}% is below the required threshold of {course.approval_threshold}%. "
             f"You may reapply with improved subject marks."
         ),
-        "evaluation_version": EVALUATION_VERSION,
+        "evaluation_version": settings.evaluation_version,
     }

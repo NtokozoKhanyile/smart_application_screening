@@ -7,10 +7,11 @@ from app.utils.security_helpers import validate_password_strength
 # A static dummy hash for timing attack mitigation
 DUMMY_HASH = "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6L6s5WrTHotdZSCy"
 
+
 def register_user(db: Session, email: str, password: str) -> User:
     # 1. Validate password complexity first
     validate_password_strength(password)
-    
+
     existing_user = db.query(User).filter(User.email == email).first()
     if existing_user:
         raise HTTPException(

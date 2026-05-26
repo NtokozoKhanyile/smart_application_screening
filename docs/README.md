@@ -252,4 +252,14 @@ Documentation is not optional – it's part of the code review!
 
 ---
 
-**Last updated:** February 2026
+5. **Start frontend:** [../frontend/lumina/README.md](../frontend/lumina/README.md) – Frontend setup and reference
+
+### For Frontend Developers
+
+- [../frontend/lumina/README.md](../frontend/lumina/README.md) – React app, components, state
+- [../ARCHITECTURE.md](../ARCHITECTURE.md) – System design, API integration
+- [../CONTRIBUTING.md](../CONTRIBUTING.md) – Coding standards, UI style
+
+---
+
+**Last updated:** May 2026

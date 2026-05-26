@@ -67,9 +67,6 @@ const ScreeningResultCard = ({ result, applicationStatus }) => {
 
   if (!result && !applicationStatus) return null
 
-  // Determine the active decision to display
-  const activeDecision = result?.final_decision || result?.decision || applicationStatus
-
   const scoreColor = (result?.prediction_score ?? 0) >= 70
     ? 'text-green-600' : (result?.prediction_score ?? 0) >= 50
     ? 'text-amber-600' : 'text-red-600'
