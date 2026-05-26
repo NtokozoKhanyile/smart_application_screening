@@ -7,13 +7,13 @@ services:
     language: python
     host: containerapp
     docker:
-      remoteBuild: true
+      remoteBuild: false
   frontend:
     project: ./frontend/lumina
     language: js
     host: containerapp
     docker:
-      remoteBuild: true
+      remoteBuild: false
     config:
       buildArgs:
         - name: VITE_API_URL
