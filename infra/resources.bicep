@@ -27,6 +27,14 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
   name: '${abbrs.keyVaultVaults}${resourceToken}'
 }
 
+resource dbPasswordSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'db-password'
+  properties: {
+    value: postgresPassword
+  }
+}
+
 // PostgreSQL Flexible Server
 resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2023-06-01-preview' = {
   name: '${abbrs.dBforPostgreSQLServers}${resourceToken}'
@@ -79,10 +87,17 @@ module backend './core/host/container-app.bicep' = {
     containerRegistryName: containerRegistry.name
     targetPort: 8000
     tags: union(tags, { 'azd-service-name': 'backend' })
+    secrets: [
+      {
+        name: 'db-password'
+        keyVaultUrl: '${keyVault.properties.vaultUri}secrets/db-password'
+        identity: 'system'
+      }
+    ]
     env: [
       {
         name: 'DATABASE_URL'
-        value: 'postgresql://psqladmin:${postgresPassword}@${postgresServer.properties.fullyQualifiedDomainName}:5432/${postgresDatabase.name}'
+        value: 'postgresql://psqladmin:db-password@${postgresServer.properties.fullyQualifiedDomainName}:5432/${postgresDatabase.name}'
       }
       {
         name: 'FRONTEND_URL'
@@ -127,6 +142,16 @@ resource acrPullRoleFrontend 'Microsoft.Authorization/roleAssignments@2022-04-01
   properties: {
     principalId: frontend.outputs.principalId
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-a505-4991-8403-ba071878b6ca')
+    principalType: 'ServicePrincipal'
+  }
+}
+
+resource keyVaultSecretsUserBackend 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: keyVault
+  name: guid(keyVault.id, backend.name, 'KeyVaultSecretsUser')
+  properties: {
+    principalId: backend.outputs.principalId
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
     principalType: 'ServicePrincipal'
   }
 }
