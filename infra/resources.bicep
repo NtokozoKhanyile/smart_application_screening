@@ -142,6 +142,7 @@ module backend './core/host/container-app.bicep' = {
     location: location
     containerAppsEnvironmentName: containerAppsEnvironment.name
     targetPort: 8000
+    tags: union(tags, { 'azd-service-name': 'backend' })
     env: [
       {
         name: 'DATABASE_URL'
@@ -163,6 +164,7 @@ module frontend './core/host/container-app.bicep' = {
     location: location
     containerAppsEnvironmentName: containerAppsEnvironment.name
     targetPort: 80
+    tags: union(tags, { 'azd-service-name': 'frontend' })
     env: [
       {
         name: 'VITE_API_URL'
