@@ -11,8 +11,10 @@ param location string
 
 param resourceGroupName string = ''
 
+@description('The unique token to use for resource naming. If empty, it will be generated.')
+param resourceToken string = toLower(uniqueString(subscription().id, environmentName, location, 'v5'))
+
 var abbrs = loadJsonContent('./abbreviations.json')
-var resourceToken = toLower(uniqueString(subscription().id, environmentName, location, 'v5'))
 var tags = { 'azd-env-name': environmentName }
 
 // Organize resources in a resource group
