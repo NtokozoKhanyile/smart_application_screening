@@ -27,7 +27,7 @@ module resources './resources.bicep' = {
     location: location
     resourceToken: resourceToken
     tags: tags
-    postgresPassword: 'P@ss${guid(resourceToken)}'
+    postgresPassword: 'P@ssw0rd1234!'
   }
 }
 
