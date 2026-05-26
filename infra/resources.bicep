@@ -8,23 +8,72 @@ param postgresPassword string
 var abbrs = loadJsonContent('./abbreviations.json')
 
 // Log Analytics Workspace for monitoring
-resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' existing = {
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' = {
   name: '${abbrs.insightsLogAnalytics}${resourceToken}'
+  location: location
+  tags: tags
+  properties: {
+    sku: {
+      name: 'PerGB2018'
+    }
+    retentionInDays: 30
+  }
 }
 
 // Application Insights
-resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = {
+resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: '${abbrs.insightsApplicationInsights}${resourceToken}'
+  location: location
+  tags: tags
+  kind: 'web'
+  properties: {
+    Application_Type: 'web'
+    WorkspaceResourceId: logAnalytics.id
+  }
+}
+
+// Container Apps Environment
+resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' = {
+  name: '${abbrs.appManagedEnvironments}${resourceToken}'
+  location: location
+  tags: tags
+  properties: {
+    appLogsConfiguration: {
+      destination: 'log-analytics'
+      logAnalyticsConfiguration: {
+        customerId: logAnalytics.properties.customerId
+        sharedKey: logAnalytics.listKeys().primarySharedKey
+      }
+    }
+  }
 }
 
 // Container Registry
-resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
+resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-07-01' = {
   name: '${abbrs.containerRegistryRegistries}${resourceToken}'
+  location: location
+  tags: tags
+  sku: {
+    name: 'Standard'
+  }
+  properties: {
+    adminUserEnabled: true
+  }
 }
 
 // Key Vault for secrets
-resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
+resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
   name: '${abbrs.keyVaultVaults}${resourceToken}'
+  location: location
+  tags: tags
+  properties: {
+    tenantId: subscription().tenantId
+    sku: {
+      family: 'A'
+      name: 'standard'
+    }
+    enableRbacAuthorization: true
+  }
 }
 
 // PostgreSQL Flexible Server
@@ -65,8 +114,24 @@ resource postgresFirewall 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRul
 }
 
 // Storage Account for blobs
-resource storage 'Microsoft.Storage/storageAccounts@2023-01-01' existing = {
+resource storage 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   name: '${abbrs.storageStorageAccounts}${resourceToken}'
+  location: location
+  tags: tags
+  sku: {
+    name: 'Standard_LRS'
+  }
+  kind: 'StorageV2'
+}
+
+resource blobServices 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01' = {
+  parent: storage
+  name: 'default'
+}
+
+resource uploadsContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
+  parent: blobServices
+  name: 'uploads'
 }
 
 // Backend Container App
@@ -75,7 +140,7 @@ module backend './core/host/container-app.bicep' = {
   params: {
     name: '${abbrs.appContainerApps}backend-${resourceToken}'
     location: location
-    containerAppsEnvironmentName: '${abbrs.appManagedEnvironments}${resourceToken}'
+    containerAppsEnvironmentName: containerAppsEnvironment.name
     containerRegistryName: containerRegistry.name
     targetPort: 8000
     tags: union(tags, { 'azd-service-name': 'backend' })
@@ -98,7 +163,7 @@ module frontend './core/host/container-app.bicep' = {
   params: {
     name: '${abbrs.appContainerApps}frontend-${resourceToken}'
     location: location
-    containerAppsEnvironmentName: '${abbrs.appManagedEnvironments}${resourceToken}'
+    containerAppsEnvironmentName: containerAppsEnvironment.name
     containerRegistryName: containerRegistry.name
     targetPort: 80
     tags: union(tags, { 'azd-service-name': 'frontend' })

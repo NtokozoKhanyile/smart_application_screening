@@ -1,20 +1,23 @@
 targetScope = 'subscription'
 
+@minLength(1)
+@maxLength(64)
 @description('Name of the environment which is used to generate a short unique hash used in all resources.')
 param environmentName string
 
+@minLength(1)
+@description('Primary location for all resources')
+param location string
+
 param resourceGroupName string = ''
 
-// Hardcoded to match your existing provisioned resources
-var location = 'northeurope'
-var resourceToken = 'u6qh5lr5owz3e'
-
 var abbrs = loadJsonContent('./abbreviations.json')
+var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 var tags = { 'azd-env-name': environmentName }
 
 // Organize resources in a resource group
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
-  name: 'rg-lumina-prod-northeurope'
+  name: !empty(resourceGroupName) ? resourceGroupName : '${abbrs.resourcesResourceGroups}${environmentName}'
   location: location
   tags: tags
 }
