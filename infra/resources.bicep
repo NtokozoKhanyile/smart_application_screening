@@ -141,13 +141,13 @@ module backend './core/host/container-app.bicep' = {
     name: '${abbrs.appContainerApps}backend-${resourceToken}'
     location: location
     containerAppsEnvironmentName: containerAppsEnvironment.name
-    containerRegistryName: containerRegistry.name
     targetPort: 8000
     tags: union(tags, { 'azd-service-name': 'backend' })
     env: [
       {
         name: 'DATABASE_URL'
-        value: 'postgresql://psqladmin:${postgresPassword}@${postgresServer.properties.fullyQualifiedDomainName}:5432/${postgresDatabase.name}'
+        // Added ?sslmode=require to prevent database connection timeouts
+        value: 'postgresql://psqladmin:${postgresPassword}@${postgresServer.properties.fullyQualifiedDomainName}:5432/${postgresDatabase.name}?sslmode=require'
       }
       {
         name: 'FRONTEND_URL'
@@ -164,7 +164,6 @@ module frontend './core/host/container-app.bicep' = {
     name: '${abbrs.appContainerApps}frontend-${resourceToken}'
     location: location
     containerAppsEnvironmentName: containerAppsEnvironment.name
-    containerRegistryName: containerRegistry.name
     targetPort: 80
     tags: union(tags, { 'azd-service-name': 'frontend' })
     env: [

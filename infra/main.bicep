@@ -12,12 +12,13 @@ param location string
 param resourceGroupName string = ''
 
 var abbrs = loadJsonContent('./abbreviations.json')
-var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
+// Updated to v6 to force fresh resource names and bypass "Conflicting State" errors
+var resourceToken = toLower(uniqueString(subscription().id, environmentName, location, 'v6'))
 var tags = { 'azd-env-name': environmentName }
 
-// Organize resources in a resource group
+// Organize resources in a resource group with location suffix to ensure a clean folder
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
-  name: !empty(resourceGroupName) ? resourceGroupName : '${abbrs.resourcesResourceGroups}${environmentName}'
+  name: !empty(resourceGroupName) ? resourceGroupName : '${abbrs.resourcesResourceGroups}${environmentName}-${location}'
   location: location
   tags: tags
 }
