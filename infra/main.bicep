@@ -5,7 +5,7 @@ param environmentName string
 
 param resourceGroupName string = ''
 
-// Hardcoded to match your existing provisioned resources (rg-lumina-prod-northeurope)
+// Hardcoded to match your existing 'good' resources (rg-lumina-prod)
 var location = 'northeurope'
 var resourceToken = 'nae5mj7xxp5iu'
 
@@ -14,7 +14,7 @@ var tags = { 'azd-env-name': environmentName }
 
 // Organize resources in a resource group
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
-  name: 'rg-lumina-prod-northeurope'
+  name: 'rg-lumina-prod'
   location: location
   tags: tags
 }
